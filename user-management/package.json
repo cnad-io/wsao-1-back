@@ -1,0 +1,25 @@
+{
+  "name": "user-management",
+  "version": "1.0.0",
+  "description": "WSAO Backend para la gestión de Usuarios y su historial.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cnad-io/wsao-1-back.git"
+  },
+  "keywords": [
+    "nodejs",
+    "user-management",
+    "rest",
+    "fastify"
+  ],
+  "author": "CNAD Team - Red Hat LATAM",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cnad-io/wsao-1-back/issues"
+  },
+  "homepage": "https://github.com/cnad-io/wsao-1-back#readme"
+}
