@@ -2,8 +2,9 @@
   "name": "game-room",
   "version": "1.0.0",
   "description": "WSAO Backend para la gestión de las sesiones de juego o Game Room.",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/cnad-io/wsao-1-back/issues"
   },
-  "homepage": "https://github.com/cnad-io/wsao-1-back#readme"
+  "homepage": "https://github.com/cnad-io/wsao-1-back#readme",
+  "dependencies": {
+    "socket.io": "^2.2.0"
+  }
 }

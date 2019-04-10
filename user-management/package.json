@@ -4,11 +4,23 @@
   "description": "WSAO Backend para la gestión de Usuarios y su historial.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tap test/**/*.test.js",
+    "start": "fastify start -l info app.js",
+    "dev": "fastify start -l debug -P app.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cnad-io/wsao-1-back.git"
+  },
+  "dependencies": {
+    "config": "^3.1.0",
+    "fastify": "^2.0.0",
+    "fastify-autoload": "^0.6.0",
+    "fastify-cli": "^1.0.0",
+    "fastify-plugin": "^1.5.0"
+  },
+  "devDependencies": {
+    "tap": "^12.5.3"
   },
   "keywords": [
     "nodejs",
