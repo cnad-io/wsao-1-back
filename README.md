@@ -8,103 +8,111 @@ Conjunto de servicios que comunican el Front con la capa de datos. Consiste en 3
 - **Waiting Room:** permite gestionar el inicio de un Game Room, espera la llegada de un mínimo de jugadores para generar la sesión y dar inicio al juego. Servicio de tipo Websocket.
 - **Game Room:** permite gestionar un Game Room, ya sea crearlo, mantener el estado, pausarlo y terminarlo. Servicio de tipo Websocket.
 
+## Arquitectura
 
+![Arquitectura](assets/architecture.png)
 
-## I/O
-### user-management
+## Definición de I/O por backend
 
-##### Register
+### User Management
+
+Para ver la especificación Open API ejecutar el paso a paso desde la documentación del [servicio](./user-management/README.md).
+
+### Waiting Room
+
+#### Join to game
+
+Descripción: TODO.
+
 Input:
 
+```json
 {
-  (String)method,
-  (String)nickname,
-  (Number)client_version
+  "method": "",
+  "token": "1i2uy2u4y23iu4y",
+  "client_version": 1
 }
+```
 
 Output:
-{
-  (String)token,
-  (String)state
-}
 
-##### Validate
+```json
+{
+  "state": "activated"
+}
+```
+
+#### Game Room Assign
+
+Descripción: TODO.
+
+Output:
+
+```json
+{
+  "state": "started",
+  "game_room_token": "1i2uy2u4y23iu4y"
+}
+```
+
+### Game Room
+
+#### Join to room
+
+Descripción: TODO.
+
 Input:
 
+```json
 {
-  (String)method,
-  (String)token,
-  (Number)client_version
+  "method": "",
+  "token": "1i2uy2u4y23iu4y",
+  "game_room_token": "1i2uy2u4y23iu4y",
+  "client_version": 1
 }
+```
 
 Output:
+
+```json
 {
-  (String)nickname,
-  (String)state
+  "state": "activated"
 }
+```
 
+#### Stage
 
-### Waiting-room:
-
-##### Join
-Input:
-{
-  (String)method,
-  (String)token,
-  (Number)client_version
-}
+Descripción: TODO.
 
 Output:
-{
-  (String)state 
-}
 
-##### Game Room Assign
-Output:
+```json
 {
-  (String)state,
-  (String)game_room_token
-}
-
-### Game-room:
-
-##### Join
-Input:
-{
-  (String)method,
-  (String)token,
-  (String)game_room_token,
-  (Number)client_version
-}
-
-Output:
-{
-  (String)state
-}
-
-##### Stage
-Output:
-{
-  (String)method,
-  (Number)timestamp,
-  players:[
+  "method": "",
+  "timestamp": 15639034985098,
+  "players": [
     {
-      (String) nickname,
-      (Number) pos_x,
-      (Number) pos_y,
-      (String) Shape      
+      "nickname": "username",
+      "pos_x": 123.5,
+      "pos_y": -71.1,
+      "shape": "monster"
     }
-    ]
-
+  ]
 }
+```
 
-##### KeyStroke
+#### KeyStroke
+
+Descripción: TODO.
 
 Input:
+
+```json
 {
-  (String)method,
-  (String)token,
-  (String)game_room_token,
-  (String)keycode,
-  (Number)client_version
+  "method": "",
+  "token": "",
+  "game_room_token": "",
+  "keycode": "",
+  "client_version": 1
 }
+```
