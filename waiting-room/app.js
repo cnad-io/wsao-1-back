@@ -31,7 +31,7 @@ io.to(waitingroom).emit('user in room', usersWaiting );
 
 var room = io.sockets.adapter.rooms[waitingroom];
 ;
-if (room.length=2)
+if (room.length=200)
 assignGameRoom();
 }
 
