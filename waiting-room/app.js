@@ -32,19 +32,19 @@ function updateRoom(){
   var room = io.sockets.adapter.rooms[waitingroom];
   io.to(waitingroom).emit('users in room', room );
 
-  if (room.length==2)
+  if (room.length==4)
   assignGameRoom();
 }
 
-function createGameRoom(room){
+function createGameRoom(){
 // create game room using game room service
-room = uuidv4();
+var room = uuidv4();
 
+return room;
 }
 
 function assignGameRoom(){
-var room = 'newroom';
-createGameRoom(room)
+var room = createGameRoom();
 var response =  { state: states.assigned , game_room_token: room }
 io.to(waitingroom).emit('go to your game room', response);
 
