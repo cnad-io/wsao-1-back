@@ -32,7 +32,7 @@ var room = io.sockets.adapter.rooms[waitingroom];
 io.to(waitingroom).emit('user in room', room );
 
 ;
-if (room.length=200)
+if (room.length==200)
 assignGameRoom();
 }
 
