@@ -1,14 +1,34 @@
 'use strict';
 
-const app = require('http').createServer(handler);
+const serverEvents = {
+    in: {
+    createRoom:'createRoom',
+    disconnect:'disconnect'
+  },
+  out:{
+    new_room:'newroom'
+  }
+}
+
+
+const app = require('http').createServer();
+const appint = require('http').createServer();
 const io = require('socket.io')(app);
+const ioint = require('socket.io')(app);
+
 const fs = require('fs');
+const uuidv4 = require('uuid/v4');
 
-app.listen(80);
+// public
+app.listen(8080);
+//Internal
+appint.listen(8081);
 
-io.on('connection', (socket) => {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', (data) => {
-    console.log(data);
+
+ioint.on('connection', (socket) => {
+  socket.on(serverEvents.in.createRoom, (data) => {
+      socket.emit(serverEvents.out.new_room, { game_room_token: uuidv4() });
+
   });
+
 });
