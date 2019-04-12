@@ -17,6 +17,15 @@ const events = {
     room_assigned: 'room assigned'
   }
 }
+const serverEvents = {
+    out: {
+    createRoom:'createRoom',
+    disconnect:'disconnect'
+  },
+  in:{
+    new_room:'newroom'
+  }
+}
 const maxplayersroom=4;
 
 const app = require('http').createServer();
@@ -24,7 +33,7 @@ const io = require('socket.io')(app);
 const fs = require('fs');
 const uuidv4 = require('uuid/v4');
 const ioOut = require('socket.io-client');
-
+const adminSocket = ioOut('http://game-room-internal.wsao.svc.cluster.local:8081');
 
 app.listen(8080);
 
@@ -50,17 +59,24 @@ function updateRoom(){
   assignGameRoom();
 }
 
+//deprecated
 function createGameRoom(){
 // create game room using game room service
+
+
+
 var room = uuidv4();
 
 return room;
 }
 
 function assignGameRoom(){
-var room = createGameRoom();
-var response =  { state: states.assigned , game_room_token: room }
-io.to(waitingroom).emit(events.out.room_assigned, response);
+
+  socket.on(serverEvents.out.createRoom, (data) => {
+    var response =  { state: states.assigned , game_room_token: data.game_room_token }
+    io.to(waitingroom).emit(events.out.room_assigned, response);
+
+  });
 
 //io.sockets.clients(waitingroom).forEach(function(s){
     //s.leave(waitingroom);
