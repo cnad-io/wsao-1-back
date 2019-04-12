@@ -12,7 +12,7 @@ const app = require('http').createServer();
 const io = require('socket.io')(app);
 const fs = require('fs');
 const uuidv4 = require('uuid/v4');
-app.listen(80);
+app.listen(8080);
 
 io.on('connection', (socket) => {
   socket.emit('news', { hello: 'world' });
