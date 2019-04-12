@@ -27,9 +27,10 @@ function join(socket, data){
 
 socket.join(waitingroom);
 io.to(waitingroom).emit('user connected', data.token);
-io.to(waitingroom).emit('user in room', usersWaiting );
 
 var room = io.sockets.adapter.rooms[waitingroom];
+io.to(waitingroom).emit('user in room', room );
+
 ;
 if (room.length=200)
 assignGameRoom();
