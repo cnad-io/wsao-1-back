@@ -42,7 +42,7 @@ room = uuidv4();
 }
 
 function assignGameRoom(){
-room = 'newroom';
+var room = 'newroom';
 createGameRoom(room)
 response =  { state: states.assigned , game_room_token: room }
 io.to(waitingroom).emit('go to your game room', response);
