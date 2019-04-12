@@ -1,14 +1,54 @@
 'use strict';
 
+states = {
+  assigned:"Assigned"
+}
+
+waitingroom = "waiting room"
+
+usersWaiting = []
+
 const app = require('http').createServer(handler);
 const io = require('socket.io')(app);
 const fs = require('fs');
-
+const uuidv4 = require('uuid/v4');
 app.listen(80);
 
 io.on('connection', (socket) => {
   socket.emit('news', { hello: 'world' });
-  socket.on('my other event', (data) => {
-    console.log(data);
+  socket.on('join', (data) => {
+    join(socket,data)
   });
 });
+
+
+
+function join(socket, data){
+
+socket.join(waitingroom);
+io.to(waitingroom).emit('user connected', data.token);
+io.to(waitingroom).emit('user in room', usersWaiting );
+
+var room = io.sockets.adapter.rooms[waitingroom];
+;
+if (room.length=2)
+assignGameRoom();
+}
+
+function createGameRoom(room){
+// create game room using game room service
+room = uuidv4();
+
+}
+
+function assignGameRoom(){
+room = 'newroom';
+createGameRoom(room)
+response =  { state: states.assigned , game_room_token: room }
+io.to(waitingroom).emit('go to your game room', response);
+
+io.sockets.clients(waitingroom).forEach(function(s){
+    s.leave(waitingroom);
+});
+
+}
