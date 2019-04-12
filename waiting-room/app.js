@@ -17,29 +17,23 @@ app.listen(8080);
 io.on('connection', (socket) => {
   socket.emit('news', { hello: 'world' });
   socket.on('join', (data) => {
-    join(socket,data)
+    socket.join(waitingroom);
+    io.to(waitingroom).emit('user connected', data.token);
+    updateRoom();
   });
   socket.on('disconnect', function () {
-
-      socket.emit('disconnected');
-      var room = io.sockets.adapter.rooms[waitingroom];
-      io.to(waitingroom).emit('user in room', room );
+    socket.emit('disconnected');
+    updateRoom();
   });
 });
 
 
+function updateRoom(){
+  var room = io.sockets.adapter.rooms[waitingroom];
+  io.to(waitingroom).emit('users in room', room );
 
-function join(socket, data){
-
-socket.join(waitingroom);
-io.to(waitingroom).emit('user connected', data.token);
-
-var room = io.sockets.adapter.rooms[waitingroom];
-io.to(waitingroom).emit('user in room', room );
-
-;
-if (room.length==200)
-assignGameRoom();
+  if (room.length==2)
+  assignGameRoom();
 }
 
 function createGameRoom(room){
