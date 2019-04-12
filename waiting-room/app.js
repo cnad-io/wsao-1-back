@@ -8,7 +8,7 @@ const waitingroom = "waiting room"
 
 var usersWaiting = []
 
-const app = require('http').createServer(handler);
+const app = require('http').createServer();
 const io = require('socket.io')(app);
 const fs = require('fs');
 const uuidv4 = require('uuid/v4');
