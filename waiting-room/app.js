@@ -14,7 +14,7 @@ const events = {
     new_player:'user connected',
     players_room: 'players in room',
     disconnected: 'disconnected',
-    room_assigned 'room assigned'
+    room_assigned: 'room assigned'
   }
 }
 const maxplayersroom=4;
