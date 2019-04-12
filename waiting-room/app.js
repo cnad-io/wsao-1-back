@@ -1,12 +1,12 @@
 'use strict';
 
-states = {
+const states = {
   assigned:"Assigned"
 }
 
-waitingroom = "waiting room"
+const waitingroom = "waiting room"
 
-usersWaiting = []
+var usersWaiting = []
 
 const app = require('http').createServer(handler);
 const io = require('socket.io')(app);
