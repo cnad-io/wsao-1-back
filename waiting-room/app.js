@@ -19,6 +19,12 @@ io.on('connection', (socket) => {
   socket.on('join', (data) => {
     join(socket,data)
   });
+  socket.on('disconnect', function () {
+
+      socket.emit('disconnected');
+      var room = io.sockets.adapter.rooms[waitingroom];
+      io.to(waitingroom).emit('user in room', room );
+  });
 });
 
 
