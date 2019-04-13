@@ -73,6 +73,7 @@ adminSocket.on('error', (error) => {
 adminSocket.on(serverEvents.in.new_room, (data) => {
   assignGameRoom(data.game_room_token);
 });
+adminSocket.connect()
 io.to(waitingroom).emit("news", {info: adminSocket.connected});
 io.to(waitingroom).emit("news", {info:"creando game-room"});
 adminSocket.emit(serverEvents.out.createRoom, {});
