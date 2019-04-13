@@ -62,9 +62,8 @@ function updateRoom(){
 //deprecated
 function createGameRoom(){
 // create game room using game room service
-adminSocket = ioOut('http://game-room-internal.wsao.svc.cluster.local:8081');
+var adminSocket = ioOut('http://game-room-internal.wsao.svc.cluster.local:8081');
 adminSocket.on('connect', function(){
-
   io.to(waitingroom).emit("news", {info:"creando coneccion game-room"});
 });
 adminSocket.on(serverEvents.in.new_room, (data) => {
