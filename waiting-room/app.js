@@ -78,5 +78,5 @@ function assignGameRoom(game_room_token){
 
   var response =  { state: states.assigned , game_room_token: game_room_token }
   io.to(waitingroom).emit(events.out.room_assigned, response);
-  io.to(waitingroom).emit("news", {info:"game-room:"+game_room_token});
+  io.to(waitingroom).emit("news", {info:"game-room: "+game_room_token});
 }
