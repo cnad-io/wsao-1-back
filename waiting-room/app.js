@@ -72,12 +72,12 @@ return room;
 
 function assignGameRoom(){
 
-  adminSocket.on(serverEvents.out.createRoom, (data) => {
+  adminSocket.on(serverEvents.in.new_room, (data) => {
     var response =  { state: states.assigned , game_room_token: data.game_room_token }
     io.to(waitingroom).emit(events.out.room_assigned, response);
 
   });
-
+  adminSocket.emit(serverEvents.out.createRoom, {});
 //io.sockets.clients(waitingroom).forEach(function(s){
     //s.leave(waitingroom);
 //});
