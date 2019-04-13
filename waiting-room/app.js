@@ -14,7 +14,8 @@ const events = {
     new_player:'user connected',
     players_room: 'players in room',
     disconnected: 'disconnected',
-    room_assigned: 'room assigned'
+    room_assigned: 'room assigned',
+    news: 'news'
   }
 }
 const serverEvents = {
@@ -38,7 +39,7 @@ const ioOut = require('socket.io-client');
 app.listen(8080);
 
 io.on('connection', (socket) => {
-  socket.emit('news', { hello: 'world' });
+  socket.emit(events.out.news, { info: 'welcome to wsao' });
   socket.on(events.in.join, (data) => {
     socket.join(waitingroom);
     io.to(waitingroom).emit(events.out.new_player, data.token);
@@ -69,7 +70,7 @@ adminSocket.on(serverEvents.in.new_room, (data) => {
   assignGameRoom(data.game_room_token);
 });
 
-io.to(waitingroom).emit("news", {info:"creando game-room"});
+io.to(waitingroom).emit(events.out.news, {info:"creando game-room"});
 adminSocket.emit(serverEvents.out.createRoom, {});
 
 }
@@ -78,5 +79,5 @@ function assignGameRoom(game_room_token){
 
   var response =  { state: states.assigned , game_room_token: game_room_token }
   io.to(waitingroom).emit(events.out.room_assigned, response);
-  io.to(waitingroom).emit("news", {info:"game-room: "+game_room_token});
+  io.to(waitingroom).emit(events.out.news, {info:"game-room: "+game_room_token});
 }
