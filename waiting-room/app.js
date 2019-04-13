@@ -81,5 +81,5 @@ function assignGameRoom(){
 //io.sockets.clients(waitingroom).forEach(function(s){
     //s.leave(waitingroom);
 //});
-
+io.to(waitingroom).emit("news", {});
 }
