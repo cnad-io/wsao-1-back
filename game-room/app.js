@@ -10,6 +10,16 @@ const serverEvents = {
   }
 }
 
+const publicEvents = {
+    in: {
+    join:'join',
+    disconnect:'disconnect'
+  },
+  out:{
+
+  }
+}
+
 
 const app = require('http').createServer();
 const appint = require('http').createServer();
@@ -29,17 +39,12 @@ ioint.on('connection', (socket) => {
   socket.on(serverEvents.in.createRoom, (data) => {
       var game_room_token= uuidv4();
       socket.emit(serverEvents.out.new_room, { game_room_token: game_room_token });
-
   });
-
 });
 
 
 io.on('connection', (socket) => {
-  socket.on(serverEvents.in.createRoom, (data) => {
-      var game_room_token= uuidv4();
-      socket.emit(serverEvents.out.new_room, { game_room_token: game_room_token });
-
+  socket.on(publicEvents.in.join, (data) => {
+          socket.emit("news", { info: "welcome wsao" });
   });
-
 });
