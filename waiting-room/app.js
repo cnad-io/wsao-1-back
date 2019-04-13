@@ -50,6 +50,9 @@ io.on('connection', (socket) => {
   });
 });
 
+const adminSocket = ioOut('http://game-room-internal.wsao.svc.cluster.local:8081');
+
+
 
 function updateRoom(){
   var room = io.sockets.adapter.rooms[waitingroom];
@@ -62,7 +65,7 @@ function updateRoom(){
 //deprecated
 function createGameRoom(){
 // create game room using game room service
-var adminSocket = ioOut('http://game-room-internal.wsao.svc.cluster.local:8081');
+
 adminSocket.on('connect', function(){
   io.to(waitingroom).emit("news", {info:"creando coneccion game-room"});
 });
@@ -73,6 +76,7 @@ adminSocket.on('error', (error) => {
 adminSocket.on(serverEvents.in.new_room, (data) => {
   assignGameRoom(data.game_room_token);
 });
+
 adminSocket.connect()
 io.to(waitingroom).emit("news", {info: adminSocket.connected});
 io.to(waitingroom).emit("news", {info:"creando game-room"});
