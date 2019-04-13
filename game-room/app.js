@@ -14,7 +14,7 @@ const serverEvents = {
 const app = require('http').createServer();
 const appint = require('http').createServer();
 const io = require('socket.io')(app);
-const ioint = require('socket.io')(appint);
+const ioint = require('socket.io')(app);
 
 const fs = require('fs');
 const uuidv4 = require('uuid/v4');

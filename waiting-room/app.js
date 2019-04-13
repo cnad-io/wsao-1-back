@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
   });
 });
 
-const adminSocket = ioOut('http://game-room-internal.wsao.svc.cluster.local:8081');
+const adminSocket = ioOut('http://game-room.wsao.svc.cluster.local:8080');
 
 
 
