@@ -66,9 +66,14 @@ var adminSocket = ioOut('http://game-room-internal.wsao.svc.cluster.local:8081')
 adminSocket.on('connect', function(){
   io.to(waitingroom).emit("news", {info:"creando coneccion game-room"});
 });
+adminSocket.on('error', (error) => {
+
+  io.to(waitingroom).emit("news", {info:"error conectando", error: error});
+});
 adminSocket.on(serverEvents.in.new_room, (data) => {
   assignGameRoom(data.game_room_token);
 });
+io.to(waitingroom).emit("news", {info: adminSocket.connected});
 io.to(waitingroom).emit("news", {info:"creando game-room"});
 adminSocket.emit(serverEvents.out.createRoom, {});
 
