@@ -13,10 +13,15 @@ const serverEvents = {
 const publicEvents = {
     in: {
     join:'join',
-    disconnect:'disconnect'
+    disconnect:'disconnect',
+    myData: 'my data',
+    keyStroke: 'keyStroke'
   },
   out:{
-
+    yourdata:'your data',
+    sceneupdate: 'scene update',
+    scoreupdate: 'score update',
+    news: 'news'
   }
 }
 
@@ -45,6 +50,13 @@ ioint.on('connection', (socket) => {
 
 io.on('connection', (socket) => {
   socket.on(publicEvents.in.join, (data) => {
-          socket.emit("news", { info: "welcome wsao" });
+          socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
+  });
+  socket.on(publicEvents.in.mydata, (data) => {
+          socket.emit(publicEvents.out.news, { info: "here is yourdata" });
+  });
+  socket.on(publicEvents.in.keyStroke, (data) => {
+  });
+  socket.on(publicEvents.in.myData, (data) => {
   });
 });
