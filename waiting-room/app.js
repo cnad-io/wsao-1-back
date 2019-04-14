@@ -39,7 +39,7 @@ const ioOut = require('socket.io-client');
 
 
 app.listen(8080);
-
+io.origins('*:*');
 io.on('connection', (socket) => {
   socket.emit(publicEvents.out.news, { info: 'welcome to wsao' });
   socket.on(publicEvents.in.join, (data) => {
