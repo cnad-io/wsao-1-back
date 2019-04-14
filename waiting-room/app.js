@@ -43,6 +43,7 @@ app.listen(8080);
 io.on('connection', (socket) => {
   socket.emit(publicEvents.out.news, { info: 'welcome to wsao' });
   socket.on(publicEvents.in.join, (data) => {
+    console.log("SOMEONE JOINED: "+JSON.stringify(data));
     var validate = validatePlayer(data.token);
     if(validate){
       socket.join(waitingroom);
@@ -73,8 +74,8 @@ function updateRoom(){
   var room = io.sockets.adapter.rooms[waitingroom];
   io.to(waitingroom).emit(publicEvents.out.players_room, room );
 
-  if (room.length==maxplayersroom)
-  createGameRoom();
+  //TODO: fix the room's members counter if (room.length==maxplayersroom)
+  //createGameRoom();
 }
 
 
