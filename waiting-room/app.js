@@ -38,9 +38,9 @@ const uuidv4 = require('uuid/v4');
 const ioOut = require('socket.io-client');
 var redis = require('socket.io-redis');
 
-io.adapter(redis({ host: 'redis-waiting-room', port: 6379 }));
 
 app.listen(8080);
+io.adapter(redis({ host: 'redis-waiting-room', port: 6379 }));
 io.origins('*:*');
 io.on('connection', (socket) => {
   socket.emit(publicEvents.out.news, { info: 'welcome to wsao' });
