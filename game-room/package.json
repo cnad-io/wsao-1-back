@@ -22,6 +22,7 @@
   "homepage": "https://github.com/cnad-io/wsao-1-back#readme",
   "dependencies": {
     "socket.io": "^2.2.0",
+    "socket.io-redis": "^5.2.0",
     "uuid": "^3.3.2"
   }
 }
