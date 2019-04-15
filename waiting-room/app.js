@@ -36,7 +36,9 @@ const io = require('socket.io')(app);
 const fs = require('fs');
 const uuidv4 = require('uuid/v4');
 const ioOut = require('socket.io-client');
+var redis = require('socket.io-redis');
 
+io.adapter(redis({ host: 'redis-waiting-room', port: 6379 }));
 
 app.listen(8080);
 
