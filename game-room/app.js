@@ -11,11 +11,12 @@ const serverEvents = {
 }
 
 const publicEvents = {
-    in: {
+  in: {
     join:'join',
     disconnect:'disconnect',
     myData: 'my data',
-    keyStroke: 'keyStroke'
+    keyStroke: 'keyStroke',
+    hygmCoors: 'here you go my coors'
   },
   out:{
     yourdata:'your data',
@@ -43,6 +44,7 @@ appint.listen(8081);
 ioint.on('connection', (socket) => {
   socket.on(serverEvents.in.createRoom, (data) => {
       var game_room_token= uuidv4();
+      //Al final se crean solas las salas al hacer join
       socket.emit(serverEvents.out.new_room, { game_room_token: game_room_token });
   });
 });
@@ -55,7 +57,8 @@ io.on('connection', (socket) => {
   socket.on(publicEvents.in.mydata, (data) => {
           socket.emit(publicEvents.out.news, { info: "here is yourdata" });
   });
-  socket.on(publicEvents.in.keyStroke, (data) => {
+  socket.on(publicEvents.in.hygmCoors, (data) => {
+          io.to(data.game_room_token).emit(publicEvents.out.sceneupdate,{changes:[data]})
   });
   socket.on(publicEvents.in.myData, (data) => {
   });
