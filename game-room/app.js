@@ -34,6 +34,7 @@ const ioint = require('socket.io')(appint);
 
 const fs = require('fs');
 const uuidv4 = require('uuid/v4');
+var redis = require('socket.io-redis');
 
 // public
 app.listen(8080);
@@ -50,6 +51,7 @@ ioint.on('connection', (socket) => {
 });
 
 
+io.adapter(redis({ host: 'redis-game-room', port: 6379 }));
 io.on('connection', (socket) => {
   socket.on(publicEvents.in.join, (data) => {
           socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
