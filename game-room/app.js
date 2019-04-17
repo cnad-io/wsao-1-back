@@ -29,21 +29,21 @@ const publicEvents = {
 const maxplayersroom=4;
 
 var initial_pos  = {
-  playerId,
-  token,
-  name,
-  sprite,
-  roomId,
-  x,
-  y,
-  z,
-  rx,
-  ry,
-  rz,
-  rw,
-  speed,
-  state,
-  rotation
+  // playerId:,
+  // token,
+  // name,
+  // sprite,
+  // roomId,
+  // x,
+  // y,
+  // z,
+  // rx,
+  // ry,
+  // rz,
+  // rw,
+  // speed,
+  // state,
+  // rotation
 
 }
 
