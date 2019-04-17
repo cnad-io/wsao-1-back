@@ -12,17 +12,18 @@ const serverEvents = {
 
 const publicEvents = {
   in: {
-    join:'join',
+    join:'join game room',
     disconnect:'disconnect',
-    myData: 'my data',
-    keyStroke: 'keyStroke',
-    hygmCoors: 'here you go my coors'
+    player_moved: 'player moved'
   },
   out:{
-    yourdata:'your data',
-    sceneupdate: 'scene update',
-    scoreupdate: 'score update',
-    news: 'news'
+    scene_updated: 'scene update',
+    score_updated: 'score update',
+    game_ready: 'game ready',
+    news: 'news',
+    remote_player_moved: 'remote player moved'
+
+
   }
 }
 
@@ -55,13 +56,20 @@ io.adapter(redis({ host: 'redis-game-room', port: 6379 }));
 io.on('connection', (socket) => {
   socket.on(publicEvents.in.join, (data) => {
           socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
+          socket.to(data.game_room_token).emit(publicEvents.out.remote_player_moved, {});
+          updateGameRoom(data.game_room_token);
   });
-  socket.on(publicEvents.in.mydata, (data) => {
-          socket.emit(publicEvents.out.news, { info: "here is yourdata" });
+  socket.on(publicEvents.in.player_moved, (data) => {
+          io.to(data.game_room_token).emit(publicEvents.out.remote_player_moved,{changes:[data]})
   });
-  socket.on(publicEvents.in.hygmCoors, (data) => {
-          io.to(data.game_room_token).emit(publicEvents.out.sceneupdate,{changes:[data]})
-  });
-  socket.on(publicEvents.in.myData, (data) => {
-  });
+  
 });
+
+
+function updateGameRoom(game_room_token){
+  var room = io.sockets.adapter.rooms[game_room_token];
+  if (room.length==maxplayersroom){
+    io.to(game_room_token).emit(publicEvents.out.game_ready, {counter:3} );
+  }
+  
+}

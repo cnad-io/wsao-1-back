@@ -13,11 +13,14 @@ const publicEvents = {
     disconnect:'disconnect'
   },
   out:{
-    new_player:'user connected',
     players_room: 'players in room',
     disconnected: 'disconnected',
+    news: 'news',
+
+    join_response: 'join response',
     room_assigned: 'room assigned',
-    news: 'news'
+    player_joined: 'player joined'
+
   }
 }
 const serverEvents = {
@@ -49,7 +52,8 @@ io.on('connection', (socket) => {
     var validate = validatePlayer(data.token);
     if(validate){
       socket.join(waitingroom);
-      io.to(waitingroom).emit(publicEvents.out.new_player, data.token);
+      socket.emit(publicEvents.out.join_response,{idplayer:socket.id});
+      io.to(waitingroom).emit(publicEvents.out.player_joined, data.token);
       updateRoom();
     }else{
       socket.emit(publicEvents.out.news, { info: 'Your token is invalid' });
