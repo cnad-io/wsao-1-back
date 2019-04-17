@@ -26,6 +26,26 @@ const publicEvents = {
 
   }
 }
+const maxplayersroom=4;
+
+var initial_pos  = {
+  playerId,
+  token,
+  name,
+  sprite,
+  roomId,
+  x,
+  y,
+  z,
+  rx,
+  ry,
+  rz,
+  rw,
+  speed,
+  state,
+  rotation
+
+}
 
 
 const app = require('http').createServer();
@@ -56,11 +76,11 @@ io.adapter(redis({ host: 'redis-game-room', port: 6379 }));
 io.on('connection', (socket) => {
   socket.on(publicEvents.in.join, (data) => {
           socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
-          socket.to(data.game_room_token).emit(publicEvents.out.remote_player_moved, {});
+          socket.emit(publicEvents.out.remote_player_moved, initial_pos);
           updateGameRoom(data.game_room_token);
   });
   socket.on(publicEvents.in.player_moved, (data) => {
-          io.to(data.game_room_token).emit(publicEvents.out.remote_player_moved,{changes:[data]})
+          socket.to(data.game_room_token).emit(publicEvents.out.remote_player_moved,{changes:[data]})
   });
   
 });
