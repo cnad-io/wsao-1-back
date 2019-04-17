@@ -65,9 +65,9 @@ appint.listen(8081);
 
 ioint.on('connection', (socket) => {
   socket.on(serverEvents.in.createRoom, (data) => {
-      var game_room_token= uuidv4();
+      var roomId= uuidv4();
       //Al final se crean solas las salas al hacer join
-      socket.emit(serverEvents.out.new_room, { game_room_token: game_room_token });
+      socket.emit(serverEvents.out.new_room, { roomId: roomId });
   });
 });
 
@@ -77,19 +77,19 @@ io.on('connection', (socket) => {
   socket.on(publicEvents.in.join, (data) => {
           socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
           socket.emit(publicEvents.out.remote_player_moved, initial_pos);
-          updateGameRoom(data.game_room_token);
+          updateGameRoom(data.roomId);
   });
   socket.on(publicEvents.in.player_moved, (data) => {
-          socket.to(data.game_room_token).emit(publicEvents.out.remote_player_moved,{changes:[data]})
+          socket.to(data.roomId).emit(publicEvents.out.remote_player_moved,{changes:[data]})
   });
   
 });
 
 
-function updateGameRoom(game_room_token){
-  var room = io.sockets.adapter.rooms[game_room_token];
+function updateGameRoom(roomId){
+  var room = io.sockets.adapter.rooms[roomId];
   if (room.length==maxplayersroom){
-    io.to(game_room_token).emit(publicEvents.out.game_ready, {counter:3} );
+    io.to(roomId).emit(publicEvents.out.game_ready, {counter:3} );
   }
   
 }

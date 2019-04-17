@@ -52,7 +52,7 @@ io.on('connection', (socket) => {
     var validate = validatePlayer(data.token);
     if(validate){
       socket.join(waitingroom);
-      socket.emit(publicEvents.out.join_response,{idplayer:socket.id});
+      socket.emit(publicEvents.out.join_response,{playerId:socket.id});
       io.to(waitingroom).emit(publicEvents.out.player_joined, data.token);
       updateRoom();
     }else{
@@ -88,7 +88,7 @@ function updateRoom(){
 function createGameRoom(){
 // create game room using game room service
   adminSocket.on(serverEvents.in.new_room, (data) => {
-    assignGameRoom(data.game_room_token);
+    assignGameRoom(data.roomId);
   });
 
   io.to(waitingroom).emit(publicEvents.out.news, {info:"creando game-room"});
@@ -96,9 +96,9 @@ function createGameRoom(){
 
 }
 
-function assignGameRoom(game_room_token){
+function assignGameRoom(roomId){
 
-  var response =  { state: states.assigned , game_room_token: game_room_token }
+  var response =  { state: states.assigned , roomId: roomId }
   io.to(waitingroom).emit(publicEvents.out.room_assigned, response);
-  io.to(waitingroom).emit(publicEvents.out.news, {info:"game-room: "+game_room_token});
+  io.to(waitingroom).emit(publicEvents.out.news, {info:"game-room: "+roomId});
 }
