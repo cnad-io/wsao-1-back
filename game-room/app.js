@@ -2,7 +2,7 @@
 
 console.log(process.env);
 const DATAGRID_PORT = process.env.DATAGRID_PORT || 11211;
-const DATAGRID_HOST = process.env.DATAGRID_HOST || 'wsao-datagrid-hotrod';
+const DATAGRID_HOST = process.env.DATAGRID_HOST || 'wsao-datagrid-memcached';
 const DATAGRID_CACHE_NAME = process.env.DATAGRID_CACHE_NAME || 'game-room';
 
 const serverEvents = {
