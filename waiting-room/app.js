@@ -93,7 +93,8 @@ function updateRoom(){
   io.to(waitingroom).emit(publicEvents.out.players_room, room );
 
   //TODO: fix the room's members counter 
-  if (room.length==maxplayersroom){
+
+  if (room != null && room.length==maxplayersroom){
     createGameRoom();
   }
   //
