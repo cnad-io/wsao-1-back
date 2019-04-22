@@ -84,7 +84,7 @@ ioint.on('connection', (socket) => {
             socket.emit(serverEvents.out.new_room, { roomId: roomId });
             return client.disconnect(); });
       }).catch(function(error) {
-
+        console.log("Got error: " + error);
         console.log("Got error: " + error.message);
       
       });
