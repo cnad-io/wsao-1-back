@@ -1,5 +1,10 @@
 'use strict';
 
+console.log(process.env);
+const DATAGRID_PORT = process.env.DATAGRID_PORT || 11211;
+const DATAGRID_HOST = process.env.DATAGRID_HOST || 'wsao-datagrid-hotrod';
+const DATAGRID_CACHE_NAME = process.env.DATAGRID_CACHE_NAME || 'game-room';
+
 const serverEvents = {
     in: {
     createRoom:'createRoom',
@@ -69,7 +74,7 @@ ioint.on('connection', (socket) => {
   socket.on(serverEvents.in.createRoom, (data) => {
       var roomId= uuidv4();
       //Al final se crean solas las salas al hacer join
-      var connected = infinispan.client({port: 11333, host: 'wsao-datagrid-hotrod'}, {cacheName: 'game-room'});
+      var connected = infinispan.client({port: DATAGRID_PORT, host: DATAGRID_HOST }, {cacheName: DATAGRID_CACHE_NAME});
       connected.then(function (client){
         console.log("connected to datagrid");
 
