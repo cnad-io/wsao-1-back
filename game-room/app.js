@@ -56,6 +56,8 @@ const ioint = require('socket.io')(appint);
 const fs = require('fs');
 const uuidv4 = require('uuid/v4');
 var redis = require('socket.io-redis');
+var infinispan = require('infinispan');
+
 
 // public
 app.listen(8080);
@@ -67,7 +69,19 @@ ioint.on('connection', (socket) => {
   socket.on(serverEvents.in.createRoom, (data) => {
       var roomId= uuidv4();
       //Al final se crean solas las salas al hacer join
-      socket.emit(serverEvents.out.new_room, { roomId: roomId });
+      var connected = infinispan.client({port: 11333, host: 'wsao-datagrid-hotrod'}, {cacheName: 'game-room'});
+      connected.then(function (client){
+        var clientPut = client.put(roomId+"_room","initiated");
+        return clientPut.finally(
+          function() { 
+            socket.emit(serverEvents.out.new_room, { roomId: roomId });
+            return client.disconnect(); });
+      }).catch(function(error) {
+
+        console.log("Got error: " + error.message);
+      
+      });
+    
   });
 });
 
@@ -75,6 +89,7 @@ ioint.on('connection', (socket) => {
 io.adapter(redis({ host: 'redis-game-room', port: 6379 }));
 io.on('connection', (socket) => {
   socket.on(publicEvents.in.join, (data) => {
+
           socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
           socket.emit(publicEvents.out.remote_player_moved, initial_pos);
           updateGameRoom(data.roomId);

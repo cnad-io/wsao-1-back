@@ -48,24 +48,34 @@ io.origins('*:*');
 io.on('connection', (socket) => {
   socket.emit(publicEvents.out.news, { info: 'welcome to wsao' });
   socket.on(publicEvents.in.join, (data) => {
-    console.log("SOMEONE JOINED: "+JSON.stringify(data));
-    var validate = validatePlayer(data.token);
-    if(validate){
-      socket.join(waitingroom);
-      socket.emit(publicEvents.out.join_response,{playerId:socket.id});
-      io.to(waitingroom).emit(publicEvents.out.player_joined, data.token);
-      updateRoom();
-    }else{
-      socket.emit(publicEvents.out.news, { info: 'Your token is invalid' });
-    }
+    on_join(socket,data);
   });
-  socket.on(publicEvents.in.disconnect, function () {
-    socket.emit(publicEvents.out.disconnected);
-    updateRoom();
+  socket.on(publicEvents.in.disconnect, () =>  {
+    on_disconnect();
   });
 });
 
 const adminSocket = ioOut('http://game-room-internal:8081');
+
+/** Socket IO Callback function **/
+function on_join(socket,data){
+  console.log("SOMEONE JOINED: "+JSON.stringify(data));
+  var validate = validatePlayer(data.token);
+  if(validate){
+    socket.join(waitingroom);
+    socket.emit(publicEvents.out.join_response,{playerId:socket.id});
+    io.to(waitingroom).emit(publicEvents.out.player_joined, data.token);
+    updateRoom();
+  }else{
+    socket.emit(publicEvents.out.news, { info: 'Your token is invalid' });
+  }
+}
+
+function on_disconnect(socket){
+  socket.emit(publicEvents.out.disconnected);
+  updateRoom();
+}
+/** END Socket IO Callback function **/
 
 
 
@@ -80,8 +90,11 @@ function updateRoom(){
   var room = io.sockets.adapter.rooms[waitingroom];
   io.to(waitingroom).emit(publicEvents.out.players_room, room );
 
-  //TODO: fix the room's members counter if (room.length==maxplayersroom)
-  //createGameRoom();
+  //TODO: fix the room's members counter 
+  if (room.length==maxplayersroom){
+    createGameRoom();
+  }
+  //
 }
 
 
