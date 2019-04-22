@@ -71,6 +71,8 @@ ioint.on('connection', (socket) => {
       //Al final se crean solas las salas al hacer join
       var connected = infinispan.client({port: 11333, host: 'wsao-datagrid-hotrod'}, {cacheName: 'game-room'});
       connected.then(function (client){
+        console.log("connected to datagrid");
+
         var clientPut = client.put(roomId+"_room","initiated");
         return clientPut.finally(
           function() { 

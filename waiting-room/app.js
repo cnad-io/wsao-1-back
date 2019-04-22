@@ -72,7 +72,9 @@ function on_join(socket,data){
 }
 
 function on_disconnect(socket){
-  socket.emit(publicEvents.out.disconnected);
+  if(socket != null){
+    socket.emit(publicEvents.out.disconnected);
+  } 
   updateRoom();
 }
 /** END Socket IO Callback function **/
