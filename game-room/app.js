@@ -63,6 +63,10 @@ const uuidv4 = require('uuid/v4');
 var redis = require('socket.io-redis');
 var infinispan = require('infinispan');
 
+//infinispan client
+var connected = infinispan.client({port: DATAGRID_PORT, host: DATAGRID_HOST }, {cacheName: DATAGRID_CACHE_NAME , version: DATAGRID_PROTO_VERSION});
+
+
 
 // public
 app.listen(8080);
@@ -74,15 +78,13 @@ ioint.on('connection', (socket) => {
   socket.on(serverEvents.in.createRoom, (data) => {
       var roomId= uuidv4();
       //Al final se crean solas las salas al hacer join
-      var connected = infinispan.client({port: DATAGRID_PORT, host: DATAGRID_HOST }, {cacheName: DATAGRID_CACHE_NAME , version: DATAGRID_PROTO_VERSION});
       connected.then(function (client){
         console.log("connected to datagrid");
 
         var clientPut = client.put(roomId+"_room","initiated");
-        return clientPut.finally(
-          function() { 
-            socket.emit(serverEvents.out.new_room, { roomId: roomId });
-            return client.disconnect(); });
+        socket.emit(serverEvents.out.new_room, { roomId: roomId });
+
+        return client;
       }).catch(function(error) {
         console.log("Got error: " + error);
         console.log("Got error: " + error.message);
@@ -115,3 +117,9 @@ function updateGameRoom(roomId){
   }
   
 }
+
+
+// disconnect all
+// return clientPut.finally(
+//   function() { 
+//     return client.disconnect(); });
