@@ -60,11 +60,11 @@ const adminSocket = ioOut('http://game-room-internal:8081');
 /** Socket IO Callback function **/
 function on_join(socket,data){
   console.log("SOMEONE JOINED: "+JSON.stringify(data));
-  var validate = validatePlayer(data.token);
+  var validate = validatePlayer(data.nickname);
   if(validate){
     socket.join(waitingroom);
-    socket.emit(publicEvents.out.join_response,{playerId:socket.id});
-    io.to(waitingroom).emit(publicEvents.out.player_joined, data.token);
+    socket.emit(publicEvents.out.join_response,{playerId:socket.id,nickname: data.nickname});
+    io.to(waitingroom).emit(publicEvents.out.player_joined, data.nickname);
     updateRoom();
   }else{
     socket.emit(publicEvents.out.news, { info: 'Your token is invalid' });
