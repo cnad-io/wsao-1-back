@@ -55,7 +55,13 @@ io.on('connection', (socket) => {
   });
 });
 
+/** Server events listeners **/
 const adminSocket = ioOut('http://game-room-internal:8081');
+adminSocket.on(serverEvents.in.new_room, (data) => {
+  assignGameRoom(data.roomId);
+});
+/** END server events listeners **/
+
 
 /** Socket IO Callback function **/
 function on_join(socket,data){
@@ -103,9 +109,8 @@ function updateRoom(){
 
 function createGameRoom(){
 // create game room using game room service
-  adminSocket.on(serverEvents.in.new_room, (data) => {
-    assignGameRoom(data.roomId);
-  });
+  //adminSocket.removeListener(serverEvents.in.new_room, [function]);
+
 
   io.to(waitingroom).emit(publicEvents.out.news, {info:"creando game-room"});
   adminSocket.emit(serverEvents.out.createRoom, {});
