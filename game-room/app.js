@@ -108,7 +108,7 @@ function on_join_game_room(socket,data){
         savePlayerMove(initial_pos);
         CheckGameRoomToStart(data.roomId);
       }else{
-        socket.emit(publicEvents.out.news, { info: "this room doesn't exist" });
+        socket.emit(publicEvents.out.news, { info: "room "+data.roomId+" doesn't exist" });
       }
     });
     return client;
@@ -148,7 +148,7 @@ function savePlayerMove(data){
 }
 function CheckGameRoomToStart(roomId){
   var room = io.sockets.adapter.rooms[roomId];
-  if (room.length==maxplayersroom){
+  if (room != null && room.length==maxplayersroom){
     io.to(roomId).emit(publicEvents.out.game_ready, {counter:3} );
   }else{
     io.to(roomId).emit(publicEvents.out.news, {info: maxplayersroom-room.length + "player remaining to start game"} );
