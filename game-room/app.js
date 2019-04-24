@@ -33,24 +33,7 @@ const publicEvents = {
 }
 const maxplayersroom=4;
 
-var initial_pos  = {
-  // playerId:,
-  // token,
-  // name,
-  // sprite,
-  // roomId,
-  // x,
-  // y,
-  // z,
-  // rx,
-  // ry,
-  // rz,
-  // rw,
-  // speed,
-  // state,
-  // rotation
 
-}
 
 
 const app = require('http').createServer();
@@ -97,29 +80,7 @@ ioint.on('connection', (socket) => {
 io.adapter(redis({ host: 'redis-game-room', port: 6379 }));
 io.on('connection', (socket) => {
   socket.on(publicEvents.in.join, (data) => {
-
-    connected.then(function (client){
-      console.log("connected to datagrid");
-      console.log("roomId requested =>"+data.roomId)
-
-
-      var clientGet = client.get(data.roomId+"_room");
-
-      var showGet = clientGet.then(
-      function(value) { 
-        if(value == 'initiated'){
-          socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
-          socket.emit(publicEvents.out.remote_player_moved, initial_pos);
-          updateGameRoom(data.roomId);
-        }
-      });
-      return client;
-    }).catch(function(error) {
-      console.log("Got error: " + error);
-      console.log("Got error: " + error.message);
-    
-    });    
-
+    on_join_game_room(socket,data);
   });
   socket.on(publicEvents.in.player_moved, (data) => {
           socket.to(data.roomId).emit(publicEvents.out.remote_player_moved,{changes:[data]})
@@ -127,8 +88,65 @@ io.on('connection', (socket) => {
   
 });
 
+/** Socket IO Callback function **/
 
-function updateGameRoom(roomId){
+
+function on_join_game_room(socket,data){
+  
+  connected.then(function (client){
+    console.log("connected to datagrid");
+    console.log("roomId requested =>"+data.roomId)
+    var clientGet = client.get(data.roomId+"_room");
+
+    var showGet = clientGet.then(
+    function(value) { 
+      if(value == 'initiated'){
+        socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
+        socket.emit(publicEvents.out.news, { info: "Assigning player location" });
+        var initial_pos= calculateInitialPost(data.roomId);
+        socket.emit(publicEvents.out.remote_player_moved, initial_pos);
+        savePlayerMove(initial_pos);
+        CheckGameRoomToStart(data.roomId);
+      }else{
+        socket.emit(publicEvents.out.news, { info: "this room doesn't exist" });
+      }
+    });
+    return client;
+  }).catch(function(error) {
+    console.log("Got error: " + error);
+    console.log("Got error: " + error.message);
+  
+  });    
+}
+/** END Socket IO Callback function **/
+
+
+function calculateInitialPost(roomId){
+  var initial_pos  = {
+    // playerId:,
+    // token,
+    // name,
+    // sprite,
+    // roomId,
+    // x,
+    // y,
+    // z,
+    // rx,
+    // ry,
+    // rz,
+    // rw,
+    // speed,
+    // state,
+    // rotation
+  
+  }
+  return initial_pos;
+}
+
+function savePlayerMove(data){
+
+}
+function CheckGameRoomToStart(roomId){
   var room = io.sockets.adapter.rooms[roomId];
   if (room.length==maxplayersroom){
     io.to(roomId).emit(publicEvents.out.game_ready, {counter:3} );
