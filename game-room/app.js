@@ -100,11 +100,14 @@ io.on('connection', (socket) => {
 
     connected.then(function (client){
       console.log("connected to datagrid");
-
+      console.log("roomId requested =>"+data.roomId)
 
 
       var clientGet = client.then(
-        function() { return client.get(data.roomId+"_room"); });
+        function() { 
+          console.log("requested =>"+data.roomId)
+
+          return client.get(data.roomId+"_room"); });
 
       var showGet = clientGet.then(
       function(value) { 
