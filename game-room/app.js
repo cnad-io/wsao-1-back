@@ -76,11 +76,10 @@ appint.listen(8081);
 
 ioint.on('connection', (socket) => {
   socket.on(serverEvents.in.createRoom, (data) => {
-      var roomId= uuidv4();
       //Al final se crean solas las salas al hacer join
       connected.then(function (client){
         console.log("connected to datagrid");
-
+        var roomId= uuidv4();
         var clientPut = client.put(roomId+"_room","initiated");
         socket.emit(serverEvents.out.new_room, { roomId: roomId });
 
@@ -99,9 +98,29 @@ io.adapter(redis({ host: 'redis-game-room', port: 6379 }));
 io.on('connection', (socket) => {
   socket.on(publicEvents.in.join, (data) => {
 
+    connected.then(function (client){
+      console.log("connected to datagrid");
+
+
+
+      var clientGet = client.then(
+        function() { return client.get(data.roomId+"_room"); });
+
+      var showGet = clientGet.then(
+      function(value) { 
+        if(value == 'initiated'){
           socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
           socket.emit(publicEvents.out.remote_player_moved, initial_pos);
           updateGameRoom(data.roomId);
+        }
+      });
+      return client;
+    }).catch(function(error) {
+      console.log("Got error: " + error);
+      console.log("Got error: " + error.message);
+    
+    });    
+
   });
   socket.on(publicEvents.in.player_moved, (data) => {
           socket.to(data.roomId).emit(publicEvents.out.remote_player_moved,{changes:[data]})
