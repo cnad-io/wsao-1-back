@@ -101,6 +101,7 @@ function on_join_game_room(socket,data){
     var showGet = clientGet.then(
     function(value) { 
       if(value == 'initiated'){
+        socket.join(data.roomId);
         socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
         socket.emit(publicEvents.out.news, { info: "Assigning player location" });
         var initial_pos= calculateInitialPost(data.roomId);
