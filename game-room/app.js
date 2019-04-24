@@ -104,10 +104,10 @@ function on_join_game_room(socket,data){
         socket.join(data.roomId);
         socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
         socket.emit(publicEvents.out.news, { info: "Assigning player location" });
-        var initial_pos= calculateInitialPost(data.roomId);
-        socket.emit(publicEvents.out.remote_player_moved, initial_pos);
-        savePlayerMove(initial_pos);
-        CheckGameRoomToStart(data.roomId);
+        var initial_location= calculateInitialLocation(data.roomId);
+        socket.emit(publicEvents.out.remote_player_moved, initial_location);
+        savePlayerMove(initial_location);
+        checkGameRoomToStart(data.roomId);
       }else{
         socket.emit(publicEvents.out.news, { info: "room "+data.roomId+" doesn't exist" });
       }
@@ -122,7 +122,7 @@ function on_join_game_room(socket,data){
 /** END Socket IO Callback function **/
 
 
-function calculateInitialPost(roomId){
+function calculateInitialLocation(roomId){
   var initial_pos  = {
     // playerId:,
     // token,
@@ -147,12 +147,15 @@ function calculateInitialPost(roomId){
 function savePlayerMove(data){
 
 }
-function CheckGameRoomToStart(roomId){
+function checkGameRoomToStart(roomId){
   var room = io.sockets.adapter.rooms[roomId];
-  if (room != null && room.length==maxplayersroom){
+  if(room == null){
+    return;
+  }
+  if (room.length==maxplayersroom){
     io.to(roomId).emit(publicEvents.out.game_ready, {counter:3} );
   }else{
-    io.to(roomId).emit(publicEvents.out.news, {info: maxplayersroom-room.length + "player remaining to start game"} );
+    io.to(roomId).emit(publicEvents.out.news, {info: maxplayersroom-room.length + " player(s) remaining to start the game"} );
   }
   
 }
