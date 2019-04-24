@@ -103,11 +103,7 @@ io.on('connection', (socket) => {
       console.log("roomId requested =>"+data.roomId)
 
 
-      var clientGet = client.then(
-        function() { 
-          console.log("requested =>"+data.roomId)
-
-          return client.get(data.roomId+"_room"); });
+      var clientGet = client.get(data.roomId+"_room");
 
       var showGet = clientGet.then(
       function(value) { 
