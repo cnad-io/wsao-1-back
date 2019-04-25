@@ -67,7 +67,7 @@ ioint.on('connection', (socket) => {
         socket.emit(serverEvents.out.new_room, { roomId: roomId });
 
         var getRoomStatus = putNewRoom.then(
-          function(value) {
+          function() {
             return client.get(data.roomId+"_room");
         });
         var showRoomStatus = getRoomStatus.then(
