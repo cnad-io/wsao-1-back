@@ -107,14 +107,14 @@ function on_join_game_room(socket,data){
     function(value) { 
       if(value == 'initiated'){
         socket.join(data.roomId);
-        var doRegisterPlayer = registerPlayer(data,socket.id,client);
+        registerPlayer(data,socket.id,client);
         socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
         socket.emit(publicEvents.out.news, { info: "Assigning player location" });
         var initial_position= calculateInitialLocation(data.roomId,data.playerId);
         socket.emit(publicEvents.out.remote_player_moved, initial_position); //borrar de aca se manejara las posiciones iniciales en el startgameroom
         savePlayerMove(initial_position);
         checkGameRoomToStart(data.roomId);
-        return doRegisterPlayer;
+        //return doRegisterPlayer;
       }else{
         socket.emit(publicEvents.out.news, { info: "room "+data.roomId+" doesn't exist" });
         return getRoomStatus;
@@ -230,8 +230,8 @@ function startGameRoom(roomId){
 
 function registerPlayer(data,socketId,cacheClient){
   console.log("Register Player: "+JSON.stringify(data));
-  //connected.then(function (client){
-    var getPlayers = cacheClient.get(data.roomId+"_players");
+  connected.then(function (client){
+    var getPlayers = client.get(data.roomId+"_players");
     var updatePlayers = getPlayers.then(
       function(value) { 
         var players = value;
@@ -246,12 +246,12 @@ function registerPlayer(data,socketId,cacheClient){
           playerNumber:player_number
         }
         console.log("New Player: "+JSON.stringify(players));
-        return cacheClient.put(data.roomId+"_players",players)
+        return client.put(data.roomId+"_players",players)
     });
-    //var clientClear = updatePlayers.then(
-    //  function() { return client.clear(); });  
-    return updatePlayers;
-  //});
+    var clientClear = updatePlayers.then(
+      function() { return client.clear(); });  
+    return clientClear;
+  });
 
 
 }
