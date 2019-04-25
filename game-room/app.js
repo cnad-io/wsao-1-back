@@ -63,10 +63,13 @@ ioint.on('connection', (socket) => {
       connected.then(function (client){
         console.log("connected to datagrid");
         var roomId= uuidv4();
-        var clientPut = client.put(roomId+"_room","initiated");
+        var putNewRoom = client.put(roomId+"_room","initiated");
         socket.emit(serverEvents.out.new_room, { roomId: roomId });
 
-        return client;
+        var clientClear = putNewRoom.then(
+          function() { return client.clear(); });
+      
+        return clientClear;
       }).catch(function(error) {
         console.log("Got error: " + error);
         console.log("Got error: " + error.message);
@@ -98,12 +101,13 @@ function on_join_game_room(socket,data){
   connected.then(function (client){
     console.log("connected to datagrid");
     console.log("roomId requested =>"+data.roomId)
-    var clientGet = client.get(data.roomId+"_room");
+    var getRoomStatus = client.get(data.roomId+"_room");
 
-    var showGet = clientGet.then(
+    var roomValidation = getRoomStatus.then(
     function(value) { 
       if(value == 'initiated'){
         socket.join(data.roomId);
+        registerPlayer(data,socket.id);
         socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
         socket.emit(publicEvents.out.news, { info: "Assigning player location" });
         var initial_position= calculateInitialLocation(data.roomId,data.playerId);
@@ -114,7 +118,10 @@ function on_join_game_room(socket,data){
         socket.emit(publicEvents.out.news, { info: "room "+data.roomId+" doesn't exist" });
       }
     });
-    return client;
+    var clientClear = roomValidation.then(
+      function() { return client.clear(); });
+  
+    return clientClear;
   }).catch(function(error) {
     console.log("Got error: " + error);
     console.log("Got error: " + error.message);
@@ -217,4 +224,32 @@ function startGameRoom(roomId){
   }
   */
   io.to(roomId).emit(publicEvents.out.game_ready, {counter:3} );
+}
+
+function registerPlayer(data,socketId){
+
+  connected.then(function (client){
+    var getPlayers = client.get(data.roomId+"_players");
+    var updatePlayers = getPlayers.then(
+      function(value) { 
+        var players = value;
+        if(players == null){
+          players = {keys:[]}
+        }
+        players.keys.indexOf(newItem) === -1 ? players.keys.push(socketId):console.log("This item already exists");
+        var player_number=players.keys.indexOf(socketId);
+        players[socketId]={         
+          playerId:data.playerId,
+          nickname:data.nickname,
+          playerNumber:player_number
+        }
+        console.log("New Player: "+JSON.stringify(players));
+        return client.put(data.roomId+"_players",players)
+    });
+    var clientClear = updatePlayers.then(
+      function() { return client.clear(); });  
+    return clientClear;
+  });
+
+
 }
