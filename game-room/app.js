@@ -239,6 +239,8 @@ function registerPlayer(data,socketId,cacheClient){
         var players = value;
         if(players == null){
           players = {keys:[]}
+        }else{
+          players = JSON.parse(players);
         }
         players.keys.indexOf(socketId) === -1 ? players.keys.push(socketId):console.log("This item already exists");
         var player_number=players.keys.indexOf(socketId);
