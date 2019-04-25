@@ -107,10 +107,6 @@ function on_join_game_room(socket,data){
         socket.join(data.roomId);
         var doRegisterPlayer = registerPlayer(data,socket.id,client);
         socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
-        socket.emit(publicEvents.out.news, { info: "Assigning player location" });
-        var initial_position= calculateInitialLocation(data.roomId,data.playerId);
-        socket.emit(publicEvents.out.remote_player_moved, initial_position); //borrar de aca se manejara las posiciones iniciales en el startgameroom
-        savePlayerMove(initial_position);
         checkGameRoomToStart(data.roomId);
         return doRegisterPlayer;
       }else{
@@ -234,17 +230,30 @@ function checkGameRoomToStart(roomId){
 
 function startGameRoom(roomId){
  connected.then(function (client){
-    var getPlayers = cacheClient.get(data.roomId+"_players");
-    var getPlayersPosition = getPlayers.then(
+    var getPlayers = client.get(data.roomId+"_players");
+
+    var calculateInitialPosition = getPlayers.then(
       function(value) { 
         var players = value;
-        var players_keys= [];
-        for(player in players.keys){
-          players_keys.push(player.playerId);
+        for(playerkey in players.keys){
+          socket.emit(publicEvents.out.news, { info: "Assigning player location" });
+          var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId);
+          savePlayerMove(initial_position,client);
         }
         return client.getAll(players_keys); 
     }); 
-  
+
+    var getPlayersPosition = calculateInitialPosition.then(
+      function(value) { 
+        var players = value;
+        var players_keys= [];
+        for(playerkey in players.keys){
+          
+          players_keys.push(roomId+"_player_"+players[playerkey].playerId);
+        }
+        return client.getAll(players_keys); 
+    }); 
+
     var sendPlayerPosition = getPlayersPosition.then(
       function(entries) {
         console.log('getAll(multi2, multi3)=%s', JSON.stringify(entries));
