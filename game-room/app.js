@@ -66,10 +66,10 @@ ioint.on('connection', (socket) => {
         var putNewRoom = client.put(roomId+"_room","initiated");
         socket.emit(serverEvents.out.new_room, { roomId: roomId });
 
-        var clientClear = putNewRoom.then(
-          function() { return client.clear(); });
+        //var clientClear = putNewRoom.then(
+        //  function() { return client.clear(); });
       
-        return clientClear;
+        return putNewRoom;
       }).catch(function(error) {
         console.log("Got error: " + error);
         console.log("Got error: " + error.message);
@@ -118,10 +118,10 @@ function on_join_game_room(socket,data){
         socket.emit(publicEvents.out.news, { info: "room "+data.roomId+" doesn't exist" });
       }
     });
-    var clientClear = roomValidation.then(
-      function() { return client.clear(); });
+    //var clientClear = roomValidation.then(
+    //  function() { return client.clear(); });
   
-    return clientClear;
+    return roomValidation;
   }).catch(function(error) {
     console.log("Got error: " + error);
     console.log("Got error: " + error.message);
@@ -227,7 +227,7 @@ function startGameRoom(roomId){
 }
 
 function registerPlayer(data,socketId){
-
+  console.log("Register Player: "+JSON.stringify(data));
   connected.then(function (client){
     var getPlayers = client.get(data.roomId+"_players");
     var updatePlayers = getPlayers.then(
@@ -246,9 +246,9 @@ function registerPlayer(data,socketId){
         console.log("New Player: "+JSON.stringify(players));
         return client.put(data.roomId+"_players",players)
     });
-    var clientClear = updatePlayers.then(
-      function() { return client.clear(); });  
-    return clientClear;
+    //var clientClear = updatePlayers.then(
+    //  function() { return client.clear(); });  
+    return updatePlayers;
   });
 
 
