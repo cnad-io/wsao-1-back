@@ -104,9 +104,9 @@ function on_join_game_room(socket,data){
         socket.join(data.roomId);
         socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
         socket.emit(publicEvents.out.news, { info: "Assigning player location" });
-        var initial_location= calculateInitialLocation(data.roomId);
-        socket.emit(publicEvents.out.remote_player_moved, initial_location);
-        savePlayerMove(initial_location);
+        var initial_position= calculateInitialLocation(data.roomId,data.playerId);
+        socket.emit(publicEvents.out.remote_player_moved, initial_position);
+        savePlayerMove(initial_position);
         checkGameRoomToStart(data.roomId);
       }else{
         socket.emit(publicEvents.out.news, { info: "room "+data.roomId+" doesn't exist" });
@@ -122,23 +122,67 @@ function on_join_game_room(socket,data){
 /** END Socket IO Callback function **/
 
 
-function calculateInitialLocation(roomId){
+function calculateInitialLocation(roomId,playerId){
+  var x;
+  var y;
+  var z;
+  var rotation;
+  var player_number;
+  var room = io.sockets.adapter.rooms[roomId];
+
+  if (room == null && room.length !=null){
+    player_number=room.length;
+
+  }
+
+  switch (player_number) {
+    case 1:
+      x=1;
+      y=1;
+      z=1;
+      rotation=1;
+      break;
+    case 2:
+      x=1;
+      y=2;
+      z=1;
+      rotation=1;
+      break;
+    case 3:
+      x=2;
+      y=1;
+      z=1;
+      rotation=1;
+      break;
+    case 4:
+      x=2;
+      y=2;
+      z=1;
+      rotation=1;
+      break;
+    default:
+      x=2;
+      y=2;
+      z=1;
+      rotation=1;
+  }
+
   var initial_pos  = {
-    // playerId:,
+     playerId: playerId,
     // token,
     // name,
     // sprite,
-    // roomId,
-    // x,
-    // y,
-    // z,
+     roomId: roomId,
+     x:x,
+     y:y,
+     z:z,
     // rx,
     // ry,
     // rz,
     // rw,
-    // speed,
+     speed:1,
     // state,
-    // rotation
+     rotation: rotation
   
   }
   return initial_pos;
@@ -153,7 +197,7 @@ function checkGameRoomToStart(roomId){
     return;
   }
   if (room.length==maxplayersroom){
-    io.to(roomId).emit(publicEvents.out.game_ready, {counter:3} );
+    startGameRoom(roomId);
   }else{
     io.to(roomId).emit(publicEvents.out.news, {info: maxplayersroom-room.length + " player(s) remaining to start the game"} );
   }
@@ -161,7 +205,12 @@ function checkGameRoomToStart(roomId){
 }
 
 
-// disconnect all
-// return clientPut.finally(
-//   function() { 
-//     return client.disconnect(); });
+function startGameRoom(roomId){
+  //broadcast all position
+  /*
+  for(player in players){
+  io.to(roomId).emit(publicEvents.out..remote_player_moved, player.initial_position);
+  }
+  */
+  io.to(roomId).emit(publicEvents.out.game_ready, {counter:3} );
+}
