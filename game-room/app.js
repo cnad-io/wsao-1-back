@@ -244,7 +244,7 @@ function registerPlayer(data,socketId,cacheClient){
         var player_number=players.keys.indexOf(socketId);
         players[socketId]={         
           playerId:data.playerId,
-          nickname:data.nickname,
+          nickname:data.nickname != null ? data.nickname:'',
           playerNumber:player_number
         }
         console.log("New Player: "+JSON.stringify(players));
