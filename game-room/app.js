@@ -130,7 +130,7 @@ function calculateInitialLocation(roomId,playerId){
   var player_number;
   var room = io.sockets.adapter.rooms[roomId];
 
-  if (room == null && room.length !=null){
+  if (room != null && room.length !=null){
     player_number=room.length;
 
   }
@@ -161,10 +161,10 @@ function calculateInitialLocation(roomId,playerId){
       rotation=1;
       break;
     default:
-      x=2;
-      y=2;
-      z=1;
-      rotation=1;
+      x=0;
+      y=0;
+      z=0;
+      rotation=0;
   }
 
   var initial_pos  = {
@@ -191,6 +191,7 @@ function calculateInitialLocation(roomId,playerId){
 function savePlayerMove(data){
 
 }
+
 function checkGameRoomToStart(roomId){
   var room = io.sockets.adapter.rooms[roomId];
   if(room == null){
