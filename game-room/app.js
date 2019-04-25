@@ -236,7 +236,7 @@ function registerPlayer(data,socketId){
         if(players == null){
           players = {keys:[]}
         }
-        players.keys.indexOf(newItem) === -1 ? players.keys.push(socketId):console.log("This item already exists");
+        players.keys.indexOf(socketId) === -1 ? players.keys.push(socketId):console.log("This item already exists");
         var player_number=players.keys.indexOf(socketId);
         players[socketId]={         
           playerId:data.playerId,
