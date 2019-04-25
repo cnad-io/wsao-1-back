@@ -47,10 +47,7 @@ var redis = require('socket.io-redis');
 var infinispan = require('infinispan');
 
 //infinispan client
-var connected = infinispan.client({port: DATAGRID_PORT, host: DATAGRID_HOST }, {cacheName: DATAGRID_CACHE_NAME , version: DATAGRID_PROTO_VERSION , dataFormat : {
-  keyType: 'application/json',
-  valueType: 'application/json'
-}});
+var connected = infinispan.client({port: DATAGRID_PORT, host: DATAGRID_HOST }, {cacheName: DATAGRID_CACHE_NAME , version: DATAGRID_PROTO_VERSION });
 
 
 
@@ -66,7 +63,7 @@ ioint.on('connection', (socket) => {
       connected.then(function (client){
         console.log("connected to datagrid");
         var roomId= uuidv4();
-        var putNewRoom = client.put({k:roomId+"_room"},{v:"initiated"});
+        var putNewRoom = client.put(roomId+"_room","initiated");
         socket.emit(serverEvents.out.new_room, { roomId: roomId });
 
         //var clientClear = putNewRoom.then(
@@ -104,7 +101,7 @@ function on_join_game_room(socket,data){
   connected.then(function (client){
     console.log("connected to datagrid");
     console.log("roomId requested =>"+data.roomId)
-    var getRoomStatus = client.get({k:data.roomId+"_room"});
+    var getRoomStatus = client.get(data.roomId+"_room");
 
     var roomValidation = getRoomStatus.then(
     function(value) { 
@@ -233,7 +230,7 @@ function startGameRoom(roomId){
 
 function registerPlayer(data,socketId,cacheClient){
   console.log("Register Player: "+JSON.stringify(data));
-    var getPlayers = cacheClient.get({k:data.roomId+"_players"});
+    var getPlayers = cacheClient.get(data.roomId+"_players");
     var updatePlayers = getPlayers.then(
       function(value) { 
         console.log(JSON.stringify(value));
@@ -251,7 +248,7 @@ function registerPlayer(data,socketId,cacheClient){
           playerNumber:player_number
         }
         console.log("New Player: "+JSON.stringify(players));
-        return cacheClient.put({k:data.roomId+"_players"},{v:players})
+        return cacheClient.put(data.roomId+"_players",JSON.stringify(players));
     }); 
     return updatePlayers;
 
