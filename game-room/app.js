@@ -66,7 +66,16 @@ ioint.on('connection', (socket) => {
         var putNewRoom = client.put(roomId+"_room","initiated");
         socket.emit(serverEvents.out.new_room, { roomId: roomId });
 
-        var clientClear = putNewRoom.then(
+        var getRoomStatus = putNewRoom.then(
+          function(value) {
+            return client.get(data.roomId+"_room");
+        });
+        var showRoomStatus = getRoomStatus.then(
+        function(value) { 
+          console.log("room: "+JSON.stringify(value))
+        });
+
+        var clientClear = showRoomStatus.then(
           function() { return client.clear(); });
       
         return clientClear;
