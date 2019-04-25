@@ -103,6 +103,7 @@ function on_join_game_room(socket,data){
 
     var roomValidation = getRoomStatus.then(
     function(value) { 
+      console.log("room: "+JSON.stringify(value))
       if(value == 'initiated'){
         socket.join(data.roomId);
         var doRegisterPlayer = registerPlayer(data,socket.id,client);
