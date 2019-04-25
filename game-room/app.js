@@ -83,7 +83,9 @@ io.on('connection', (socket) => {
     on_join_game_room(socket,data);
   });
   socket.on(publicEvents.in.player_moved, (data) => {
-          socket.to(data.roomId).emit(publicEvents.out.remote_player_moved,{changes:[data]})
+          socket.to(data.roomId).emit(publicEvents.out.remote_player_moved,data)
+          savePlayerMove(data);
+          //caculateEvents(data);
   });
   
 });
@@ -105,7 +107,7 @@ function on_join_game_room(socket,data){
         socket.emit(publicEvents.out.news, { info: "welcome wsao game room" });
         socket.emit(publicEvents.out.news, { info: "Assigning player location" });
         var initial_position= calculateInitialLocation(data.roomId,data.playerId);
-        socket.emit(publicEvents.out.remote_player_moved, initial_position);
+        socket.emit(publicEvents.out.remote_player_moved, initial_position); //borrar de aca se manejara las posiciones iniciales en el startgameroom
         savePlayerMove(initial_position);
         checkGameRoomToStart(data.roomId);
       }else{
@@ -131,6 +133,7 @@ function calculateInitialLocation(roomId,playerId){
   var room = io.sockets.adapter.rooms[roomId];
 
   if (room != null && room.length !=null){
+    //Todo: obtener posiciones basado en data y no en el tamaño del room
     player_number=room.length;
 
   }
