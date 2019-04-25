@@ -233,6 +233,9 @@ function registerPlayer(data,socketId,cacheClient){
     var getPlayers = cacheClient.get(data.roomId+"_players");
     var updatePlayers = getPlayers.then(
       function(value) { 
+        console.log(JSON.stringify(value));
+        console.log(data.roomId+"_players");
+
         var players = value;
         if(players == null){
           players = {keys:[]}
