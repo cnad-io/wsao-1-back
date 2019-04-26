@@ -75,10 +75,10 @@ ioint.on('connection', (socket) => {
           console.log("room: "+JSON.stringify(value))
         });
 
-        var clientClear = showRoomStatus.then(
-          function() { return client.clear(); });
+        //var clientClear = showRoomStatus.then(
+        //  function() { return client.clear(); });
       
-        return clientClear;
+        //return clientClear;
       }).catch(function(error) {
         console.log("Got error: " + error);
         console.log("Got error: " + error.message);
