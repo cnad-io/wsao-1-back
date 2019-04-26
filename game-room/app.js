@@ -244,7 +244,8 @@ function startGameRoom(roomId){
 
     var calculateInitialPosition = getPlayers.then(
       function(value) { 
-        var players = value;
+
+        var players = JSON.parse(value);
         for(playerkey in players.keys){
           socket.emit(publicEvents.out.news, { info: "Assigning player location" });
           var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId);
@@ -255,7 +256,7 @@ function startGameRoom(roomId){
 
     var getPlayersPosition = calculateInitialPosition.then(
       function(value) { 
-        var players = value;
+        var players = JSON.parse(value);
         var players_keys= [];
         for(playerkey in players.keys){
           players_keys.push(roomId+"_player_"+players[playerkey].playerId);
