@@ -244,11 +244,14 @@ function startGameRoom(roomId){
 
     var calculateInitialPosition = getPlayers.then(
       function(value) { 
+        console.log('getPlayers=%s', value);
 
         var players = JSON.parse(value);
         var playerkey;
+        io.to(roomId).emit(publicEvents.out.news, { info: "Assigning player location" });
         for(playerkey in players.keys){
-          io.to(roomId).emit(publicEvents.out.news, { info: "Assigning player location" });
+          console.log('playerkey=%s', playerkey);
+
           var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId);
           savePlayerMove(initial_position,client);
         }
