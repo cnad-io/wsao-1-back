@@ -74,11 +74,6 @@ ioint.on('connection', (socket) => {
         function(value) { 
           console.log("room: "+JSON.stringify(value))
         });
-
-        //var clientClear = showRoomStatus.then(
-        //  function() { return client.clear(); });
-      
-        //return clientClear;
       }).catch(function(error) {
         console.log("Got error: " + error);
         console.log("Got error: " + error.message);
@@ -139,8 +134,6 @@ function on_player_moved(socket,data){
   connected.then(function (client){
     var savePlayerMove = savePlayerMove(data,client);
     //caculateEvents(data);
-    //var clientClear = savePlayerMove.then(function() { return client.clear(); });
-    //return clientClear;
   }).catch(function(error) {
     console.log("Got error: " + error);
     console.log("Got error: " + error.message);
@@ -288,10 +281,10 @@ function registerPlayer(data,socketId,cacheClient){
         console.log(data.roomId+"_players");
         /* TODO: identificar si cambia el socket */
         var players = value;
-        if(players == null){
-          players = {keys:[]}
-        }else{
+        if(players != null){
           players = JSON.parse(players);
+        }else{
+          players = {keys:[]}
         }
         players.keys.indexOf(socketId) === -1 ? players.keys.push(socketId):console.log("This item already exists");
         var player_number=1+players.keys.indexOf(socketId);
