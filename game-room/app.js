@@ -240,7 +240,7 @@ function checkGameRoomToStart(roomId){
 
 function startGameRoom(roomId){
  connected.then(function (client){
-    var getPlayers = client.get(data.roomId+"_players");
+    var getPlayers = client.get(roomId+"_players");
 
     var calculateInitialPosition = getPlayers.then(
       function(value) { 
@@ -296,7 +296,7 @@ function registerPlayer(data,socketId,cacheClient){
           players = JSON.parse(players);
         }
         players.keys.indexOf(socketId) === -1 ? players.keys.push(socketId):console.log("This item already exists");
-        var player_number=players.keys.indexOf(socketId);
+        var player_number=1+players.keys.indexOf(socketId);
         players[socketId]={         
           playerId:data.playerId,
           nickname:data.nickname != null ? data.nickname:'',
