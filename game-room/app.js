@@ -250,10 +250,10 @@ function startGameRoom(roomId){
           var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId);
           savePlayerMove(initial_position,client);
         }
-        return client.getAll(players_keys); 
+//        return client.get(roomId+"_players"); 
     }); 
 
-    var getPlayersPosition = calculateInitialPosition.then(
+    var getPlayersPosition = getPlayers.then(
       function(value) { 
         var players = value;
         var players_keys= [];
