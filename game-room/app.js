@@ -247,14 +247,14 @@ function startGameRoom(roomId){
         console.log('getPlayers=%s', value);
 
         var players = JSON.parse(value);
-        var playerkey;
         io.to(roomId).emit(publicEvents.out.news, { info: "Assigning player location" });
-        for(playerkey in players.keys){
+        players.keys.forEach((playerkey) => {
           console.log('playerkey=%s', playerkey);
 
           var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId);
-          savePlayerMove(initial_position,client);
-        }
+          savePlayerMove(initial_position,client);        
+        });
+      
         return client.get(roomId+"_players"); 
     }); 
 
@@ -262,10 +262,9 @@ function startGameRoom(roomId){
       function(value) { 
         var players = JSON.parse(value);
         var players_keys= [];
-        var playerkey;
-        for(playerkey in players.keys){
-          players_keys.push(roomId+"_player_"+players[playerkey].playerId);
-        }
+        players.keys.forEach((playerkey) => {
+          players_keys.push(roomId+"_player_"+players[playerkey].playerId);       
+        });
         console.log('players_keys=%s', JSON.stringify(players_keys));
 
         return client.getAll(players_keys); 
