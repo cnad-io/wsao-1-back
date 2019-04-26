@@ -151,21 +151,13 @@ function on_player_moved(socket,data){
 /** END Socket IO Callback function **/
 
 
-function calculateInitialLocation(roomId,playerId){
+function calculateInitialLocation(roomId,playerId,playerNumber){
   var x;
   var y;
   var z;
   var rotation;
-  var player_number;
-  var room = io.sockets.adapter.rooms[roomId];
 
-  if (room != null && room.length !=null){
-    //Todo: obtener posiciones basado en data y no en el tamaño del room
-    player_number=room.length;
-
-  }
-
-  switch (player_number) {
+  switch (playerNumber) {
     case 1:
       x=1;
       y=1;
@@ -249,7 +241,7 @@ function startGameRoom(roomId){
         var players = JSON.parse(value);
         io.to(roomId).emit(publicEvents.out.news, { info: "Assigning player location" });
         players.keys.forEach((playerkey) => {
-          var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId);
+          var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId,players[playerkey].playerNumber);
           savePlayerMove(initial_position,client);        
         });
       
