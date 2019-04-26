@@ -124,10 +124,10 @@ function on_join_game_room(socket,data){
         return getRoomStatus;
       }
     });
-    var clientClear = roomValidation.then(
-      function() { return client.clear(); });
+    //var clientClear = roomValidation.then(
+    //  function() { return client.clear(); });
   
-    return clientClear;
+    //return clientClear;
   }).catch(function(error) {
     console.log("Got error: " + error);
     console.log("Got error: " + error.message);
@@ -139,8 +139,8 @@ function on_player_moved(socket,data){
   connected.then(function (client){
     var savePlayerMove = savePlayerMove(data,client);
     //caculateEvents(data);
-    var clientClear = savePlayerMove.then(function() { return client.clear(); });
-    return clientClear;
+    //var clientClear = savePlayerMove.then(function() { return client.clear(); });
+    //return clientClear;
   }).catch(function(error) {
     console.log("Got error: " + error);
     console.log("Got error: " + error.message);
@@ -270,8 +270,8 @@ function startGameRoom(roomId){
       }
     );
   
-    var clientClear = sendPlayerPosition.then(function() { return client.clear(); });
-    return clientClear;
+    //var clientClear = sendPlayerPosition.then(function() { return client.clear(); });
+    //return clientClear;
   }).catch(function(error) {
     console.log("Got error: " + error);
     console.log("Got error: " + error.message);
