@@ -250,17 +250,18 @@ function startGameRoom(roomId){
           var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId);
           savePlayerMove(initial_position,client);
         }
-//        return client.get(roomId+"_players"); 
+        return client.get(roomId+"_players"); 
     }); 
 
-    var getPlayersPosition = getPlayers.then(
+    var getPlayersPosition = calculateInitialPosition.then(
       function(value) { 
         var players = value;
         var players_keys= [];
         for(playerkey in players.keys){
-          
           players_keys.push(roomId+"_player_"+players[playerkey].playerId);
         }
+        console.log('players_keys=%s', JSON.stringify(players_keys));
+
         return client.getAll(players_keys); 
     }); 
 
