@@ -3,7 +3,7 @@
 const states = {
   assigned: "Assigned",
   waiting: "waiting in room",
-  rejected: "rwjected"
+  rejected: "rejected"
 }
 
 const waitingroom = "waiting room"
@@ -102,6 +102,8 @@ function updateRoom(){
 
   if (room != null && room.length==maxplayersroom){
     createGameRoom();
+  }else {
+    io.to(waitingroom).emit(publicEvents.out.news, {info: maxplayersroom-room.length + " player(s) remaining to assign a game room"} );
   }
   //
 }
