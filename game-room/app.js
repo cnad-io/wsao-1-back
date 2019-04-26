@@ -248,7 +248,7 @@ function startGameRoom(roomId){
         var players = JSON.parse(value);
         var playerkey;
         for(playerkey in players.keys){
-          socket.emit(publicEvents.out.news, { info: "Assigning player location" });
+          io.to(roomId).emit(publicEvents.out.news, { info: "Assigning player location" });
           var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId);
           savePlayerMove(initial_position,client);
         }
