@@ -272,7 +272,11 @@ function startGameRoom(roomId){
 
     var sendPlayerPosition = getPlayersPosition.then(
       function(entries) {
-        console.log('getAll(multi2, multi3)=%s', JSON.stringify(entries));
+        console.log('entries=%s', JSON.stringify(entries));
+        entries.forEach((move) => {
+          io.to(roomId).emit(publicEvents.out.remote_player_moved,JSON.parse(move));
+
+        });
       }
     );
   
