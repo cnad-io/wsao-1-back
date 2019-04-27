@@ -132,7 +132,7 @@ function on_join_game_room(socket,data){
 function on_player_moved(socket,data){
   socket.to(data.roomId).emit(publicEvents.out.remote_player_moved,data)
   connected.then(function (client){
-    var savePlayerMove = savePlayerMove(data,client);
+    var doSavePlayerMove = savePlayerMove(data,client);
     //caculateEvents(data);
   }).catch(function(error) {
     console.log("Got error: " + error);
@@ -204,9 +204,9 @@ function calculateInitialLocation(roomId,playerId,playerNumber){
 }
 
 function savePlayerMove(data,cacheClient){
-  var savePlayerMove = cacheClient.put(data.roomId+"_player_"+data.playerId,JSON.stringify(data) );
+  var doSavePlayerMove = cacheClient.put(data.roomId+"_player_"+data.playerId,JSON.stringify(data) );
 
-  return savePlayerMove;
+  return doSavePlayerMove;
 }
 
 function checkGameRoomToStart(roomId){
