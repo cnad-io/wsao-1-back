@@ -17,4 +17,6 @@ spec:
           value: game-room
         - name: deploymentconfig
           value: game-room
+        - name: openshiftobjectsfolder
+          value: game-room/ocp_resources
     type: JenkinsPipeline

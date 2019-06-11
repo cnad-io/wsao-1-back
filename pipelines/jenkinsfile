@@ -2,11 +2,22 @@
 def namespace = namespace //from jenkinsPipelineStrategy env
 def buildconfig = buildconfig //from jenkinsPipelineStrategy env
 def deploymentconfig = deploymentconfig  //from jenkinsPipelineStrategy env
+def openshiftObjectsFolder = openshiftobjectsfolder  //from jenkinsPipelineStrategy env
+
 def gituri
 def gitbranch
 def gitsecret
 
-
+def openshiftObjects = [
+  "DeploymentConfig": [],
+  "BuildConfig": [],
+  "Route": [],
+  "ImageStream": [],
+  "Secret": [],
+  "Service": [],
+  "PersistentVolumenClaim": [],
+  "ConfigMap" : [],
+];
 
 pipeline{
   agent {
@@ -15,6 +26,45 @@ pipeline{
     }
   } // agent
   stages {
+      stage ('UpdateResources'){  steps { script {
+        openshift.withCluster() {
+          openshift.withProject(namespace) {
+            def bc = openshift.selector( 'bc', buildconfig).object()
+            gituri = bc.spec.source.git.uri
+            gitbranch = bc.spec.source.git.ref
+            gitsecret = namespace+'-'+bc.spec.source.sourceSecret.name
+          }
+        } // openshift.withCluster()
+      } } } // script / steps / stage GatheringInfo
+
+      stage ('Updating resources'){  steps { script {
+        final foundFiles = sh(script: "ls -1 ${openshiftObjectsFolder}", returnStdout: true).split()
+        foundFiles.each {
+            // Saving the openshift/kubernetes objects for later use
+            def yamlObj = readYaml( file: "${openshiftObjectsFolder}/${it}" )
+            // this will use the kind type of the yaml obj as the key vale for its map
+            // if the yaml kind is BuildConfig then it will be added
+            // o the openshiftObjects.BuildConfig array
+            openshiftObjects[yamlObj.kind].add( yamlObj )
+        }
+        echo "[DEV: Create Objects] Creating/updating objects"
+        openshift.withCluster() {
+          openshift.withProject(namespace) {
+            openshiftObjects.each {
+              echo "[DEV: Create Objects] Working with ${it.value.size()} ${it.key} objects"
+              if (it.value != null){
+                  it.value.eachWithIndex  { obj, index ->
+                  def result = openshift.apply(obj);
+                  echo "[DEV: Create Objects] ${obj.kind} ${obj.metadata.name} created/updated in ${namespace} project"
+                }
+
+              }
+           }
+          }
+        } // openshift.withCluster()
+
+
+      } } } // script / steps / stage GatheringInfo
 
       stage ('Build') {  steps { script {
 

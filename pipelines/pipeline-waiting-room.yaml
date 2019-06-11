@@ -17,4 +17,6 @@ spec:
           value: waiting-room
         - name: deploymentconfig
           value: waiting-room
+        - name: openshiftobjectsfolder
+          value: waiting-room/ocp_resources
     type: JenkinsPipeline
