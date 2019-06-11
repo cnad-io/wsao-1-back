@@ -1,0 +1,20 @@
+apiVersion: "v1"
+kind: "BuildConfig"
+metadata:
+  name: "pipeline-wsao-game-room"
+spec:
+    source:
+    git:
+      ref: develop
+      uri: 'https://github.com/cnad-io/wsao-1-back.git'
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: pipeline/jenkinsfile
+      env:
+        - name: namespace
+          value: wsao
+        - name: buildconfig
+          value: game-room
+        - name: deploymentconfig
+          value: game-room
+    type: JenkinsPipeline

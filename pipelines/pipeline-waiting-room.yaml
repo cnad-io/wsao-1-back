@@ -1,0 +1,20 @@
+apiVersion: "v1"
+kind: "BuildConfig"
+metadata:
+  name: "pipeline-wsao-waiting-room"
+spec:
+    source:
+    git:
+      ref: develop
+      uri: 'https://github.com/cnad-io/wsao-1-back.git'
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: pipeline/jenkinsfile
+      env:
+        - name: namespace
+          value: wsao
+        - name: buildconfig
+          value: waiting-room
+        - name: deploymentconfig
+          value: waiting-room
+    type: JenkinsPipeline

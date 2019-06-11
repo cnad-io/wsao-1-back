@@ -1,0 +1,53 @@
+// pipeline
+def namespace = namespace //from jenkinsPipelineStrategy env
+def buildconfig = buildconfig //from jenkinsPipelineStrategy env
+def deploymentconfig = deploymentconfig  //from jenkinsPipelineStrategy env
+def gituri
+def gitbranch
+def gitsecret
+
+
+
+pipeline{
+  agent {
+    node {
+      label 'maven'
+    }
+  } // agent
+  stages {
+
+      stage ('Build') {  steps { script {
+
+        openshift.withCluster() {
+          openshift.withProject(namespace) {
+            echo "[Build] Running buildconfig as s2i build"
+            def currentBuild = openshift.startBuild(buildconfig)
+            echo "build ${currentBuild.object().metadata.name}"
+
+            def currentbuilds = openshift.selector("build ${currentBuild.object().metadata.name}")
+
+            timeout(10) {
+              currentbuilds.untilEach(1) {
+                echo "[Build]: Wating for build ${it.object().metadata.name} to finish"
+                return (it.object().status.phase == "Complete")
+              }
+
+            }
+          }
+        } // openshift.withCluster()
+      } } } // script / steps / stage build
+
+      stage ('Deploy') {  steps { script {
+        openshift.withCluster() {
+          openshift.withProject(namespace) {
+            def dc = openshift.selector('dc', deploymentconfig)
+            // this will wait until the desired replicas are available
+            dc.rollout().latest()
+            dc.rollout().status()
+            taskStatus = "SUCCESSFUL"
+          }
+        } // openshift.withCluster()
+      } } } // script / steps / stage deploy
+  } // stages
+
+} //pipeline
