@@ -29,7 +29,7 @@ spec:
         deploymentconfig: game-room
     spec:
       containers:
-      - image: docker-registry.default.svc:5000/wsao/game-room@sha256:2bf6f18764b23db60b7d335b0f73e43ceee56348d5070eb03ece2fcb8159d28b
+      - image: docker-registry.default.svc:5000/wsao/game-room
         imagePullPolicy: Always
         name: game-room
         ports:
