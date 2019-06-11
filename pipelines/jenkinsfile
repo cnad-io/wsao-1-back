@@ -27,17 +27,6 @@ pipeline{
   } // agent
   stages {
       stage ('UpdateResources'){  steps { script {
-        openshift.withCluster() {
-          openshift.withProject(namespace) {
-            def bc = openshift.selector( 'bc', buildconfig).object()
-            gituri = bc.spec.source.git.uri
-            gitbranch = bc.spec.source.git.ref
-            gitsecret = namespace+'-'+bc.spec.source.sourceSecret.name
-          }
-        } // openshift.withCluster()
-      } } } // script / steps / stage GatheringInfo
-
-      stage ('Updating resources'){  steps { script {
         final foundFiles = sh(script: "ls -1 ${openshiftObjectsFolder}", returnStdout: true).split()
         foundFiles.each {
             // Saving the openshift/kubernetes objects for later use
