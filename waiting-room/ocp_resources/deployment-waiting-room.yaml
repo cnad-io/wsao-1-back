@@ -46,7 +46,6 @@ spec:
   test: false
   triggers:
   - imageChangeParams:
-      automatic: true
       containerNames:
       - waiting-room
       from:
