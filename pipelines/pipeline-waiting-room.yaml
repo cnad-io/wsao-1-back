@@ -3,7 +3,7 @@ kind: "BuildConfig"
 metadata:
   name: "pipeline-wsao-waiting-room"
 spec:
-    source:
+  source:
     git:
       ref: develop
       uri: 'https://github.com/cnad-io/wsao-1-back.git'
