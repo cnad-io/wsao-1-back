@@ -65,7 +65,7 @@ ioint.on('connection', (socket) => {
         var players = {keys:[]};
         var putplayersObject = client.put(roomId+"_players",JSON.stringify(players));
 
-        var putNewRoom = putplayersObject.put(roomId+"_room","initiated");
+        var putNewRoom = client.put(roomId+"_room","initiated");
         socket.emit(serverEvents.out.new_room, { roomId: roomId });
 
         var getRoomStatus = putNewRoom.then(
