@@ -26,41 +26,7 @@ if (process.env.REDIS_ADAPTER_URL) {
 logger.info('Setting acepted origins.');
 io.origins('*:*');
 
-io.on('connection', function (socket) {
-  logger.info('Connection stated.');
-  socket.emit(events.public.out.news, { info: 'welcome to wsao' });
-  logger.info('Configure join event.');
-  socket.on(events.in.join, function (data) {
-    roomControler.on.join(socket, data);
-  });
-  logger.info('Configure disconnect event.');
-  socket.on(events.in.disconnect, function () {
-    roomControler.on.disconnect(socket);
-  });
-});
-
-logger.info('Starting admin socket.');
-var adminURL = process.env.ADMIN_URL || 'http://game-room-internal:8081';
-logger.debug('Admin socket URL.', adminURL);
-var adminSocket = ioOut(adminURL);
-
-adminSocket.on(events.server.in.newRoom, function (data) {
-  logger.info('New room requested.');
-  logger.debug('New room requested data.', data);
-  var response =  { state: states.assigned , roomId: data.roomId }
-  io.to('waiting').emit(events.public.out.roomAssigned, response);
-  io.to('waiting').emit(events.public.out.news, {
-    info: 'game-room: ' + data.roomId
-  });
-});
-
-process.on('playerJoined', function (nickname) {
-  logger.info('Player joined.');
-  io.to('waiting')
-    .emit(events.public.out.playerJoined, nickname);
-});
-
-process.on('updateRoom', function () {
+var updateRoom = function () {
   var room = io.sockets.adapter.rooms.waiting;
   io.to('waiting')
   .emit(
@@ -82,4 +48,43 @@ process.on('updateRoom', function () {
       info: maxPlayers - room.length + " player(s) remaining to assign a game room."
     }
   );
-})
+};
+
+io.on('connection', function (socket) {
+  logger.info('Connection stated.');
+  socket.emit(events.public.out.news, { info: 'welcome to wsao' });
+  logger.info('Configure join event.');
+  socket.on(events.public.in.join, function (data) {
+    roomControler.on.join(data).then(function () {
+      socket.join('waiting');
+      socket.emit(events.public.out.joinResponse,
+        { playerId: socket.id, nickname: data.nickname });
+        logger.info('Player joined.');
+      io.to('waiting')
+        .emit(events.public.out.playerJoined, data.nickname);
+      updateRoom();
+    })
+    .catch(function () {
+      socket.emit(events.public.out.news, { info: 'Your token is invalid' });
+    });
+  });
+  logger.info('Configure disconnect event.');
+  socket.on(events.public.in.disconnect, function () {
+    updateRoom();
+  });
+});
+
+logger.info('Starting admin socket.');
+var adminURL = process.env.ADMIN_URL || 'http://game-room-internal:8081';
+logger.debug('Admin socket URL.', adminURL);
+var adminSocket = ioOut(adminURL);
+
+adminSocket.on(events.server.in.newRoom, function (data) {
+  logger.info('New room requested.');
+  logger.debug('New room requested data.', data);
+  var response =  { state: states.assigned , roomId: data.roomId }
+  io.to('waiting').emit(events.public.out.roomAssigned, response);
+  io.to('waiting').emit(events.public.out.news, {
+    info: 'game-room: ' + data.roomId
+  });
+});
