@@ -1,127 +1,85 @@
 'use strict';
 
-const states = {
-  assigned: "Assigned",
-  waiting: "waiting in room",
-  rejected: "rejected"
-}
-
-const waitingroom = "waiting room"
-const publicEvents = {
-  in: {
-    join:'join',
-    disconnect:'disconnect'
-  },
-  out:{
-    players_room: 'players in room',
-    disconnected: 'disconnected',
-    news: 'news',
-
-    join_response: 'join response',
-    room_assigned: 'room assigned',
-    player_joined: 'player joined'
-
-  }
-}
-const serverEvents = {
-    out: {
-    createRoom:'createRoom',
-    disconnect:'disconnect'
-  },
-  in:{
-    new_room:'newroom'
-  }
-}
-const maxplayersroom=4;
-
-const app = require('http').createServer();
-const io = require('socket.io')(app);
-const fs = require('fs');
-const uuidv4 = require('uuid/v4');
-const ioOut = require('socket.io-client');
+var app = require('http').createServer();
+var io = require('socket.io')(app);
+var ioOut = require('socket.io-client');
 var redis = require('socket.io-redis');
+var logger = require('pino')({ 'level': process.env.LOG_LEVEL || 'info' });
 
+var events = require('./models/events');
+var states = require('./models/states');
+var roomControler = require('./controllers/room');
 
+logger.info('Starting server with port 8080.');
 app.listen(8080);
-io.adapter(redis({ host: 'redis-waiting-room', port: 6379 }));
+
+if (process.env.REDIS_ADAPTER_URL) {
+  logger.info('Integrating with Redis.');
+  var redisConnection = {
+    host: process.env.REDIS_ADAPTER_URL || 'redis-waiting-room',
+    port: 6379
+  };
+  logger.debug('Redis configuration.', redisConnection);
+  io.adapter(redis(redisConnection));
+}
+
+logger.info('Setting acepted origins.');
 io.origins('*:*');
-io.on('connection', (socket) => {
-  socket.emit(publicEvents.out.news, { info: 'welcome to wsao' });
-  socket.on(publicEvents.in.join, (data) => {
-    on_join(socket,data);
+
+io.on('connection', function (socket) {
+  logger.info('Connection stated.');
+  socket.emit(events.out.news, { info: 'welcome to wsao' });
+  logger.info('Configure join event.');
+  socket.on(events.in.join, function (data) {
+    roomControler.on.join(socket, data);
   });
-  socket.on(publicEvents.in.disconnect, () =>  {
-    on_disconnect();
+  logger.info('Configure disconnect event.');
+  socket.on(events.in.disconnect, function () {
+    roomControler.on.disconnect(socket);
   });
 });
 
-/** Server events listeners **/
-const adminSocket = ioOut('http://game-room-internal:8081');
-adminSocket.on(serverEvents.in.new_room, (data) => {
-  assignGameRoom(data.roomId);
+logger.info('Starting admin socket.');
+var adminURL = process.env.ADMIN_URL || 'http://game-room-internal:8081';
+logger.debug('Admin socket URL.', adminURL);
+var adminSocket = ioOut(adminURL);
+
+adminSocket.on(events.server.in.newRoom, function (data) {
+  logger.info('New room requested.');
+  logger.debug('New room requested data.', data);
+  var response =  { state: states.assigned , roomId: data.roomId }
+  io.to('waiting').emit(events.public.out.roomAssigned, response);
+  io.to('waiting').emit(events.public.out.news, {
+    info: 'game-room: ' + data.roomId
+  });
 });
-/** END server events listeners **/
 
+process.on('playerJoined', function (nickname) {
+  logger.info('Player joined.');
+  io.to('waiting')
+    .emit(events.public.out.playerJoined, nickname);
+});
 
-/** Socket IO Callback function **/
-function on_join(socket,data){
-  console.log("SOMEONE JOINED: "+JSON.stringify(data));
-  var validate = validatePlayer(data.nickname);
-  if(validate){
-    socket.join(waitingroom);
-    socket.emit(publicEvents.out.join_response,{playerId:socket.id,nickname: data.nickname});
-    io.to(waitingroom).emit(publicEvents.out.player_joined, data.nickname);
-    updateRoom();
-  }else{
-    socket.emit(publicEvents.out.news, { info: 'Your token is invalid' });
+process.on('updateRoom', function () {
+  var room = io.sockets.adapter.rooms.waiting;
+  io.to('waiting')
+  .emit(
+    events.public.out.playersRoom,
+    room
+  );
+  var maxPlayers = process.env.MAX_PLAYER_PER_ROOM || 4;
+  if (!room && room.length == maxPlayers){
+    io.to('waiting')
+    .emit(events.public.out.news, {
+      info: 'creando game-room'
+    });
+    return adminSocket.emit(events.public.out.createRoom, {});
   }
-}
-
-function on_disconnect(socket){
-  if(socket != null){
-    socket.emit(publicEvents.out.disconnected);
-  } 
-  updateRoom();
-}
-/** END Socket IO Callback function **/
-
-
-
-function validatePlayer(token){
-
-//TODO: conexion a management user
-
-  return true;
-}
-
-function updateRoom(){
-  var room = io.sockets.adapter.rooms[waitingroom];
-  io.to(waitingroom).emit(publicEvents.out.players_room, room );
-
-  //TODO: fix the room's members counter 
-
-  if (room != null && room.length==maxplayersroom){
-    createGameRoom();
-  }else {
-    io.to(waitingroom).emit(publicEvents.out.news, {info: maxplayersroom-room.length + " player(s) remaining to assign a game room"} );
-  }
-  //
-}
-
-
-function createGameRoom(){
-// create game room using game room service
-  //adminSocket.removeListener(serverEvents.in.new_room, [function]);
-
-
-  io.to(waitingroom).emit(publicEvents.out.news, {info:"creando game-room"});
-  adminSocket.emit(serverEvents.out.createRoom, {});
-
-}
-
-function assignGameRoom(roomId){
-
-  var response =  { state: states.assigned , roomId: roomId }
-  io.to(waitingroom).emit(publicEvents.out.room_assigned, response);
-  io.to(waitingroom).emit(publicEvents.out.news, {info:"game-room: "+roomId});
-}
+  io.to('waiting')
+  .emit(
+    events.public.out.news,
+    {
+      info: maxPlayers - room.length + " player(s) remaining to assign a game room."
+    }
+  );
+})
