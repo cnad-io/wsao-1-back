@@ -28,7 +28,7 @@ io.origins('*:*');
 
 io.on('connection', function (socket) {
   logger.info('Connection stated.');
-  socket.emit(events.out.news, { info: 'welcome to wsao' });
+  socket.emit(events.public.out.news, { info: 'welcome to wsao' });
   logger.info('Configure join event.');
   socket.on(events.in.join, function (data) {
     roomControler.on.join(socket, data);
