@@ -39,7 +39,7 @@ var updateRoom = function () {
     .emit(events.public.out.news, {
       info: 'creando game-room'
     });
-    return adminSocket.emit(events.public.out.createRoom, {});
+    adminSocket.emit(events.public.out.createRoom, {});
   }
   io.to('waiting')
   .emit(
@@ -76,7 +76,7 @@ io.on('connection', function (socket) {
 
 logger.info('Starting admin socket.');
 var adminURL = process.env.ADMIN_URL || 'http://game-room-internal:8081';
-logger.debug('Admin socket URL.', adminURL);
+logger.info('Admin socket URL.', adminURL);
 var adminSocket = ioOut(adminURL);
 
 adminSocket.on(events.server.in.newRoom, function (data) {
