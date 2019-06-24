@@ -39,15 +39,16 @@ var updateRoom = function () {
     .emit(events.public.out.news, {
       info: 'creando game-room'
     });
-    adminSocket.emit(events.public.out.createRoom, {});
+    adminSocket.emit(events.server.out.createRoom, {});
+  }else{
+    io.to('waiting')
+    .emit(
+      events.public.out.news,
+      {
+        info: maxPlayers - room.length + " player(s) remaining to assign a game room."
+      }
+    );
   }
-  io.to('waiting')
-  .emit(
-    events.public.out.news,
-    {
-      info: maxPlayers - room.length + " player(s) remaining to assign a game room."
-    }
-  );
 };
 
 io.on('connection', function (socket) {
