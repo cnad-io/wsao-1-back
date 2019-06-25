@@ -80,8 +80,6 @@ var onJoinGameRoom = function (data) {
           });
         
 
-
-
     });
   };
 
@@ -118,6 +116,7 @@ var onJoinGameRoom = function (data) {
   };
 
   function checkGameRoomToStart (roomId) {
+    logger.info("checkGameRoomToStart");
     //var room = io.sockets.adapter.rooms[roomId];
     var room = { length: 2}
     if(room == null){
