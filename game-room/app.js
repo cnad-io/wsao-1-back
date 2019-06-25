@@ -61,7 +61,7 @@ io.adapter(redis({
   port: 6379
 }));
 
-io.on('connection', (socket) => {
+io.on('connection', function (socket) {
   socket.on(events.public.in.join, function (data) {
     on_join_game_room(socket, data);
   });
@@ -104,6 +104,8 @@ function on_join_game_room(socket, data) {
 }
 
 function on_player_moved(socket, data) {
+  logger.info("User moved");
+  logger.debug("Data", data);
   socket.to(data.roomId).emit(
     events.public.out.remote_player_moved,
     data
@@ -204,16 +206,16 @@ function startGameRoom (roomId) {
  connected.then(function (client) {
     var getPlayers = client.get(roomId + "_players");
     var calculateInitialPosition = getPlayers.then(function(value) {
-        logger.info('getPlayers=%s', value);
+      logger.info('getPlayers=%s', value);
 
-        var players = JSON.parse(value);
-        io.to(roomId).emit(events.public.out.news, { info: "Assigning player location" });
-        players.keys.forEach((playerkey) => {
-          var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId,players[playerkey].playerNumber);
-          savePlayerMove(initial_position,client);
-        });
+      var players = JSON.parse(value);
+      io.to(roomId).emit(events.public.out.news, { info: "Assigning player location" });
+      players.keys.forEach((playerkey) => {
+        var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId,players[playerkey].playerNumber);
+        savePlayerMove(initial_position,client);
+      });
 
-        return client.get(roomId+"_players");
+      return client.get(roomId+"_players");
     });
 
     var getPlayersPosition = calculateInitialPosition.then(
@@ -231,7 +233,6 @@ function startGameRoom (roomId) {
       function(entries) {
         entries.forEach((move) => {
           io.to(roomId).emit(events.public.out.remote_player_moved,JSON.parse(move.value));
-
         });
       }
     );
