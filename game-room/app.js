@@ -1,5 +1,6 @@
 'use strict';
 
+var events = require('./models/events');
 var roomController = require('./controllers/room');
 
 
