@@ -44,6 +44,7 @@ io.adapter(redis({
 
 io.on('connection', function (socket) {
   socket.on(events.public.in.join, function (data) {
+    data.socketId=socket.id;
     roomController.on.joinGameRoom(data).then( function (response){
         socket.join(data.roomId);
         socket.emit(events.public.out.news, {
