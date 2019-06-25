@@ -135,6 +135,8 @@ var onJoinGameRoom = function (data) {
 
   }
 
+  }
+
   var calculateInitialLocation = function (roomId, playerId, playerNumber) {
     var x;
     var y;
