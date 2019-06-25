@@ -62,7 +62,7 @@ io.on('connection', function (socket) {
 
 
 process.on("send news to room", (roomId,data) => {
-  io.to(data.roomId).emit(events.public.out.news,roomId, data);
+  io.to(roomId).emit(events.public.out.news,roomId, data);
 
 });
 
