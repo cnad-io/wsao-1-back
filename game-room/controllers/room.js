@@ -115,7 +115,7 @@ var onJoinGameRoom = function (data) {
     });
   };
 
-  function checkGameRoomToStart (roomId) {
+  var checkGameRoomToStart = function (roomId) {
     logger.info("checkGameRoomToStart");
     //var room = io.sockets.adapter.rooms[roomId];
     var room = { length: 2}
@@ -126,14 +126,10 @@ var onJoinGameRoom = function (data) {
     //if (room.length == maxplayersroom) {
       startGameRoom(roomId);
     } else {
-
-        
         process.emit("send news to room",roomId,{
             info: maxplayersroom-room.length + " player(s) remaining to start the game"
         });
-
-  }
-
+    }
   }
 
   var calculateInitialLocation = function (roomId, playerId, playerNumber) {
@@ -195,48 +191,35 @@ var onJoinGameRoom = function (data) {
     return initial_pos;
   }
 
-
-
-  function on_player_moved(socket, data) {
+  var savePlayerMove = function (data) {
     logger.info("User moved");
     logger.debug("Data", data);
-    socket.to(data.roomId).emit(
-      events.public.out.remote_player_moved,
-      data
-    );
+
     connected.then(function (client) {
       //var doSavePlayerMove = savePlayerMove(data,client);
+      client.put(
+        data.roomId + "_player_" + data.playerId,
+        JSON.stringify(data)
+      );
       //caculateEvents(data);
     }).catch(function(error) {
       logger.error("Got error:", error);
     });
   }
-  /** END Socket IO Callback function **/
   
   
   
-  
-  function savePlayerMove (data, cacheClient) {
-    var doSavePlayerMove = cacheClient.put(
-      data.roomId + "_player_" + data.playerId,
-      JSON.stringify(data)
-    );
-    return doSavePlayerMove;
-  }
-  
-  
-  
-  function startGameRoom (roomId) {
+  var startGameRoom = function (roomId) {
    connected.then(function (client) {
       var getPlayers = client.get(roomId + "_players");
       var calculateInitialPosition = getPlayers.then(function(value) {
         logger.info('getPlayers=%s', value);
   
         var players = JSON.parse(value);
-        io.to(roomId).emit(events.public.out.news, { info: "Assigning player location" });
+        process.emit("send news to room",roomId,{ info: "Assigning player location" });
         players.keys.forEach((playerkey) => {
           var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId,players[playerkey].playerNumber);
-          savePlayerMove(initial_position,client);
+          savePlayerMove(initial_position);
         });
   
         return client.get(roomId+"_players");
@@ -256,7 +239,7 @@ var onJoinGameRoom = function (data) {
       var sendPlayerPosition = getPlayersPosition.then(
         function(entries) {
           entries.forEach((move) => {
-            io.to(roomId).emit(events.public.out.remote_player_moved,JSON.parse(move.value));
+            process.emit("send player move to room",JSON.parse(move.value));
           });
         }
       );
@@ -264,7 +247,8 @@ var onJoinGameRoom = function (data) {
     }).catch(function(error) {
       logger.error("Got error:", error);
     });
-    io.to(roomId).emit(events.public.out.game_ready, {counter: 3});
+
+    process.emit("send game ready signal",{roomId: roomId , counter: 3})
   }
   
 
@@ -272,6 +256,7 @@ var onJoinGameRoom = function (data) {
 module.exports = {
     on: {
       joinGameRoom: onJoinGameRoom,
-      createGameRoom: onCreateGameRoom
+      createGameRoom: onCreateGameRoom,
+      playerMove: savePlayerMove
     }
   };
