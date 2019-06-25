@@ -51,16 +51,7 @@ appint.listen(8081);
 
 ioint.on('connection', function (socket) {
   socket.on(events.server.in.createRoom, function (data) {
-    //Al final se crean solas las salas al hacer join
-    connected.then(function (client) {
-      logger.info("connected to datagrid");
-      var roomId = uuidv4();
-      // var players = {keys:[]};
-      // var putplayersObject = client.put(roomId+"_players",JSON.stringify(players));
-
-ioint.on('connection', (socket) => {
-  socket.on(serverEvents.in.createRoom, (data) => {
-      //Al final se crean solas las salas al hacer join
+        //Al final se crean solas las salas al hacer join
     roomController.on.createGameRoom(data).then(
       function(response){
         socket.emit(serverEvents.out.new_room, { roomId: response.roomId });
