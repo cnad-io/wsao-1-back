@@ -1,3 +1,4 @@
+
 "use strict";
 
 var logger = require('pino')({ 'level': process.env.LOG_LEVEL || 'info' });
@@ -15,7 +16,9 @@ const DATAGRID_PROTO_VERSION =  process.env.DATAGRID_PROTO_VERSION || '2.5';
 
 //infinispan client
 var connected = infinispan.client({port: DATAGRID_PORT, host: DATAGRID_HOST }, {cacheName: DATAGRID_CACHE_NAME , version: DATAGRID_PROTO_VERSION });
+
 var onCreateGameRoom = function (data) {
+
     return new Promise(function (resolve, reject) {
     
         connected.then(function (client){
@@ -44,7 +47,9 @@ var onCreateGameRoom = function (data) {
 
 
     
-    }
+    });
+
+
 };
 
 
