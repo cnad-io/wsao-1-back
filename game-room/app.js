@@ -40,27 +40,9 @@ var appint = require('http').createServer();
 var io = require('socket.io')(app);
 var ioint = require('socket.io')(appint);
 
-<<<<<<< HEAD
 const fs = require('fs');
 var redis = require('socket.io-redis');
 
-=======
-var uuidv4 = require('uuid/v4');
-var redis = require('socket.io-redis');
-var infinispan = require('infinispan');
-var events = require('./models/events');
-var logger = require('pino')({ 'level': process.env.LOG_LEVEL || 'info' });
-
-logger.info('Creating infinitspan connection');
-var connected = infinispan.client({
-  port: process.env.DATAGRID_PORT || 11333,
-  host: process.env.DATAGRID_HOST || 'wsao-datagrid-hotrod'
-}, {
-  cacheName: process.env.DATAGRID_CACHE_NAME || 'game-room',
-  version: process.env.DATAGRID_PROTO_VERSION || '2.5'
-});
-logger.debug('Infinitspan connection created', connected);
->>>>>>> cc302ca07ad437fc891e24bafd1745e3f495bfe6
 
 // public
 app.listen(8080);
