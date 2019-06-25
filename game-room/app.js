@@ -68,11 +68,11 @@ process.on("send news to room", (roomId,data) => {
 });
 
 process.on("send player move to room", (data) => {
-  logger.info("send a message to " + roomId)
+  logger.info("send a message to " + data.roomId)
   io.to(data.roomId).emit(events.public.out.remote_player_moved,data);
 });
 
 process.on("send game ready signal", (data) => {
-  logger.info("send a message to " + roomId)
+  logger.info("send a message to " + data.roomId)
   io.to(data.roomId).emit(events.public.out.game_ready,data);
 });
