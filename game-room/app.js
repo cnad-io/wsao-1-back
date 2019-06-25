@@ -14,6 +14,7 @@ var events = require('./models/events');
 var logger = require('pino')({ 'level': process.env.LOG_LEVEL || 'info' });
 
 logger.info('Creating infinitspan connection');
+
 var connected = infinispan.client({
   port: process.env.DATAGRID_PORT || 11333,
   host: process.env.DATAGRID_HOST || 'wsao-datagrid-hotrod'
@@ -21,16 +22,16 @@ var connected = infinispan.client({
   cacheName: process.env.DATAGRID_CACHE_NAME || 'game-room',
   version: process.env.DATAGRID_PROTO_VERSION || '2.5'
 });
+
 logger.debug('Infinitspan connection created', connected);
 
-// public
 app.listen(8080);
-//Internal
 appint.listen(8081);
 
 ioint.on('connection', function (socket) {
   socket.on(events.server.in.createRoom, function (data) {
-    //Al final se crean solas las salas al hacer join
+    logger.info('Creating room');
+    logger.debug('Data sent to create room', data);
     connected.then(function (client) {
       logger.info("connected to datagrid");
       var roomId = uuidv4();
@@ -38,14 +39,14 @@ ioint.on('connection', function (socket) {
       // var putplayersObject = client.put(roomId+"_players",JSON.stringify(players));
 
       var putNewRoom = client.put(
-        roomId + "_room",
-        "initiated"
+        roomId + '_room',
+        'initiated'
       );
 
       socket.emit(events.server.out.new_room, { roomId: roomId });
 
       var getRoomStatus = putNewRoom.then(function() {
-        return client.get(roomId+"_room");
+        return client.get(roomId + '_room');
       });
       var showRoomStatus = getRoomStatus.then(function (value) {
         logger.debug("Room: ", JSON.stringify(value));

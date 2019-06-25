@@ -33,11 +33,11 @@ var updateRoom = function () {
     events.public.out.playersRoom,
     room
   );
-  var maxPlayers = process.env.MAX_PLAYER_PER_ROOM || 4;
+  var maxPlayers = process.env.MAX_PLAYER_PER_ROOM || '4';
   if (!room) {
     return;
   }
-  if (room.length == maxPlayers) {
+  if (room.length === parseInt(maxPlayers, 0)) {
     io.to('waiting')
     .emit(events.public.out.news, {
       info: 'creando game-room'

@@ -7,8 +7,6 @@ var Promise = require('bluebird');
 var player = require('./player');
 
 var onJoin = function (data) {
-
-  logger.info(data.nickname + ' joined.');
   return new Promise(function (resolve, reject) {
     logger.info(data.nickname + ' joined.');
     logger.debug('Data received from join attempt.', data);
