@@ -1,10 +1,12 @@
 'use strict';
 
+var roomController = require('./controllers/room');
+
+
+var logger = require('pino')({ 'level': process.env.LOG_LEVEL || 'info' });
+
 console.log(process.env);
-const DATAGRID_PORT = process.env.DATAGRID_PORT || 11333;
-const DATAGRID_HOST = process.env.DATAGRID_HOST || 'wsao-datagrid-hotrod';
-const DATAGRID_CACHE_NAME = process.env.DATAGRID_CACHE_NAME || 'game-room';
-const DATAGRID_PROTO_VERSION =  process.env.DATAGRID_PROTO_VERSION || '2.5';
+
 const serverEvents = {
     in: {
     createRoom:'createRoom',
@@ -39,13 +41,7 @@ const io = require('socket.io')(app);
 const ioint = require('socket.io')(appint);
 
 const fs = require('fs');
-const uuidv4 = require('uuid/v4');
 var redis = require('socket.io-redis');
-var infinispan = require('infinispan');
-
-//infinispan client
-var connected = infinispan.client({port: DATAGRID_PORT, host: DATAGRID_HOST }, {cacheName: DATAGRID_CACHE_NAME , version: DATAGRID_PROTO_VERSION });
-
 
 
 // public
@@ -57,30 +53,14 @@ appint.listen(8081);
 ioint.on('connection', (socket) => {
   socket.on(serverEvents.in.createRoom, (data) => {
       //Al final se crean solas las salas al hacer join
-      connected.then(function (client){
-        console.log("connected to datagrid");
-        var roomId= uuidv4();
+    roomController.on.createGameRoom(data).then(
+      function(response){
+        socket.emit(serverEvents.out.new_room, { roomId: response.roomId });
 
-
-        var players = {keys:[]};
-        var putplayersObject = client.put(roomId+"_players",JSON.stringify(players));
-
-        var putNewRoom = client.put(roomId+"_room","initiated");
-        socket.emit(serverEvents.out.new_room, { roomId: roomId });
-
-        var getRoomStatus = putNewRoom.then(
-          function() {
-            return client.get(roomId+"_room");
-        });
-        var showRoomStatus = getRoomStatus.then(
-        function(value) {
-          console.log("room: "+JSON.stringify(value))
-        });
-      }).catch(function(error) {
-        console.log("Got error: " + error);
-        console.log("Got error: " + error.message);
-
-      });
+      }
+    ).catch(function () {
+     
+    });
 
   });
 });
