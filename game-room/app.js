@@ -1,6 +1,5 @@
 'use strict';
 
-<<<<<<< HEAD
 var roomController = require('./controllers/room');
 
 
@@ -35,9 +34,6 @@ const publicEvents = {
   }
 }
 const maxplayersroom=4;
-=======
-var maxplayersroom = 4;
->>>>>>> cc302ca07ad437fc891e24bafd1745e3f495bfe6
 
 var app = require('http').createServer();
 var appint = require('http').createServer();
