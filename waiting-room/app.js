@@ -8,7 +8,7 @@ var logger = require('pino')({ 'level': process.env.LOG_LEVEL || 'info' });
 
 var events = require('./models/events');
 var states = require('./models/states');
-var roomControler = require('./controllers/room');
+var roomController = require('./controllers/room');
 
 logger.info('Starting server with port 8080.');
 app.listen(8080);
@@ -37,12 +37,12 @@ var updateRoom = function () {
   if (!room) {
     return;
   }
-  if (room.length == maxPlayers){
+  if (room.length == maxPlayers) {
     io.to('waiting')
     .emit(events.public.out.news, {
       info: 'creando game-room'
     });
-    return adminSocket.emit(events.public.out.createRoom, {});
+    adminSocket.emit(events.server.out.createRoom, {});
   }
   io.to('waiting')
   .emit(
@@ -58,7 +58,7 @@ io.on('connection', function (socket) {
   socket.emit(events.public.out.news, { info: 'welcome to wsao' });
   logger.info('Configure join event.');
   socket.on(events.public.in.join, function (data) {
-    roomControler.on.join(data).then(function () {
+    roomController.on.join(data).then(function () {
       socket.join('waiting');
       socket.emit(events.public.out.joinResponse,
         { playerId: socket.id, nickname: data.nickname });
@@ -79,7 +79,7 @@ io.on('connection', function (socket) {
 
 logger.info('Starting admin socket.');
 var adminURL = process.env.ADMIN_URL || 'http://game-room-internal:8081';
-logger.debug('Admin socket URL.', adminURL);
+logger.info('Admin socket URL.', adminURL);
 var adminSocket = ioOut(adminURL);
 
 adminSocket.on(events.server.in.newRoom, function (data) {
