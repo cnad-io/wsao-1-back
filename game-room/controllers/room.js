@@ -130,7 +130,7 @@ var onJoinGameRoom = function (data) {
         
         process.emit("send news to room",roomId,{
             info: maxplayersroom-room.length + " player(s) remaining to start the game"
-        })
+        });
 
   }
 
