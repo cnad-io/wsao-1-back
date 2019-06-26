@@ -54,23 +54,23 @@ io.on('connection', function (socket) {
     });
   });
   socket.on(events.public.in.player_moved, function (data) {
-    process.emit("send player move to room",data);
+    process.emit(events.process.sendPlayerMoveToRoom,data);
     roomController.on.playerMove(data);
   });
 });
 
 
-process.on("send news to room", (roomId,data) => {
+process.on(events.process.sendNewsToRoom, (roomId,data) => {
   logger.info("send a message to " + roomId)
   io.to(roomId).emit(events.public.out.news,data);
 });
 
-process.on("send player move to room", (data) => {
+process.on(events.process.sendPlayerMoveToRoom, (data) => {
   logger.info("send a message to " + data.roomId)
   io.to(data.roomId).emit(events.public.out.remote_player_moved,data);
 });
 
-process.on("send game ready signal", (data) => {
+process.on(events.process.sendGameReadySignal, (data) => {
   logger.info("send a message to " + data.roomId)
   io.to(data.roomId).emit(events.public.out.game_ready,data);
 });

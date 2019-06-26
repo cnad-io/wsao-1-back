@@ -7,6 +7,8 @@ var logger = require('pino')({ 'level': process.env.LOG_LEVEL || 'info' });
 var Promise = require('bluebird');
 var infinispan = require('infinispan');
 const uuidv4 = require('uuid/v4');
+var events = require('../models/events');
+
 
 
 const DATAGRID_PORT = process.env.DATAGRID_PORT || 11333;
@@ -130,7 +132,7 @@ var onJoinGameRoom = function (data) {
             if (players.keys.length == maxplayersroom) {
                 startGameRoom(roomId);
             } else {
-                process.emit("send news to room",roomId,{
+                process.emit(events.process.sendNewsToRoom,roomId,{
                     info: maxplayersroom-players.keys.length + " player(s) remaining to start the game"
                 });
             }
@@ -226,7 +228,7 @@ var onJoinGameRoom = function (data) {
         logger.info('getPlayers=%s', value);
   
         var players = JSON.parse(value);
-        process.emit("send news to room",roomId,{ info: "Assigning player location" });
+        process.emit(events.process.sendNewsToRoom,roomId,{ info: "Assigning player location" });
         players.keys.forEach((playerkey) => {
           var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId,players[playerkey].playerNumber);
           savePlayerMove(initial_position);
@@ -249,7 +251,7 @@ var onJoinGameRoom = function (data) {
       var sendPlayerPosition = getPlayersPosition.then(
         function(entries) {
           entries.forEach((move) => {
-            process.emit("send player move to room",JSON.parse(move.value));
+            process.emit(events.process.sendPlayerMoveToRoom,JSON.parse(move.value));
           });
         }
       );
@@ -258,7 +260,7 @@ var onJoinGameRoom = function (data) {
       logger.error("Got error:", error);
     });
 
-    process.emit("send game ready signal",{roomId: roomId , counter: 3})
+    process.emit(events.process.sendGameReadySignal,{roomId: roomId , counter: 3})
   }
   
 

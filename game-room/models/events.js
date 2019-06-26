@@ -23,6 +23,11 @@ module.exports = {
     out:{
       new_room: 'newroom'
     }
+  },
+  process:{
+    sendNewsToRoom: "send news to room",
+    sendPlayerMoveToRoom: "send player move to room",
+    sendGameReadySignal: "send game ready signal"
   }
 };
 
