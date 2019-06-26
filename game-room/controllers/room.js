@@ -1,7 +1,7 @@
 
 "use strict";
 
-const maxplayersroom=4;
+const maxplayersroom=process.env.MAX_PLAYER_PER_ROOM || 2;
 
 var logger = require('pino')({ 'level': process.env.LOG_LEVEL || 'info' });
 var Promise = require('bluebird');
@@ -118,18 +118,28 @@ var onJoinGameRoom = function (data) {
   var checkGameRoomToStart = function (roomId) {
     logger.info("checkGameRoomToStart");
     //var room = io.sockets.adapter.rooms[roomId];
-    var room = { length: 2}
-    if(room == null){
-      return;
-    }
-    if (room.length == maxplayersroom) {
-    //if (room.length == maxplayersroom) {
-      startGameRoom(roomId);
-    } else {
-        process.emit("send news to room",roomId,{
-            info: maxplayersroom-room.length + " player(s) remaining to start the game"
+    connected.then(function (client) {
+        var getPlayers = client.get(roomId + "_players");
+        getPlayers.then(function (value) {
+            var players = value;
+            if (players != null) {
+                players = JSON.parse(players);
+            } else {
+                players = {keys:[]}
+            }
+            if (players.keys.length == maxplayersroom) {
+                startGameRoom(roomId);
+            } else {
+                process.emit("send news to room",roomId,{
+                    info: maxplayersroom-players.keys.length + " player(s) remaining to start the game"
+                });
+            }
+
         });
-    }
+    }).catch(function(error) {
+        logger.error("Got error:", error);
+    });
+
   }
 
   var calculateInitialLocation = function (roomId, playerId, playerNumber) {
