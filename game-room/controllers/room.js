@@ -99,9 +99,9 @@ var onJoinGameRoom = function (data) {
         } else {
             players = {keys:[]}
         }
-        players.keys.indexOf(data.socketId) === -1 ? players.keys.push(data.socketId): logger.info("This item already exists");
-        var player_number=1+players.keys.indexOf(data.socketId);
-        players[data.socketId]={
+        players.keys.indexOf(data.playerId) === -1 ? players.keys.push(data.playerId): logger.info("This item already exists");
+        var player_number=1+players.keys.indexOf(data.playerId);
+        players[data.playerId]={
             playerId: data.playerId,
             nickname: data.nickname != null ? data.nickname:'',
             playerNumber: player_number
