@@ -1,22 +1,15 @@
 'use strict';
 
-var events = require('./models/events');
-var roomController = require('./controllers/room');
-
-
 var logger = require('pino')({ 'level': process.env.LOG_LEVEL || 'info' });
-
-console.log(process.env);
-
 
 var app = require('http').createServer();
 var appint = require('http').createServer();
 var io = require('socket.io')(app);
 var ioint = require('socket.io')(appint);
-
-const fs = require('fs');
 var redis = require('socket.io-redis');
 
+var events = require('./models/events');
+var roomController = require('./controllers/room');
 
 app.listen(8080);
 appint.listen(8081);
