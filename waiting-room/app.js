@@ -59,6 +59,7 @@ io.on('connection', function (socket) {
   logger.info('Configure join event.');
   socket.on(events.public.in.join, function (data) {
     roomController.on.join(data).then(function () {
+      logger.info(data);
       socket.join('waiting');
       socket.emit(events.public.out.joinResponse,
         { playerId: socket.id, nickname: data.nickname });
