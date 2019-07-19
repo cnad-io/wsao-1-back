@@ -58,9 +58,8 @@ io.on('connection', function (socket) {
   socket.emit(events.public.out.news, { info: 'welcome to wsao' });
   logger.info('Configure join event.');
   socket.on(events.public.in.join, function (data) {
-    logger.debug('Data received', data, typeof data);
     var joinInput = data
-    if (typeof data == 'object') {
+    if (typeof data != 'object') {
       joinInput = JSON.parse(data);
     }
     roomController.on.join(joinInput).then(function () {
