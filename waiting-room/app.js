@@ -58,10 +58,12 @@ io.on('connection', function (socket) {
   socket.emit(events.public.out.news, { info: 'welcome to wsao' });
   logger.info('Configure join event.');
   socket.on(events.public.in.join, function (data) {
-    data=JSON.parse(data)
-    logger.info(data);
-
-    roomController.on.join(data).then(function () {
+    logger.debug('Data received', data, typeof data);
+    var joinInput = data
+    if (typeof data == 'object') {
+      joinInput = JSON.parse(data);
+    }
+    roomController.on.join(joinInput).then(function () {
       socket.join('waiting');
       socket.emit(events.public.out.joinResponse,
         { playerId: socket.id, nickname: data.nickname });
