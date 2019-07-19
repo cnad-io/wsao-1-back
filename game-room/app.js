@@ -48,23 +48,28 @@ io.on('connection', function (socket) {
     });
   });
   socket.on(events.public.in.player_moved, function (data) {
-    process.emit(events.process.sendPlayerMoveToRoom,data);
-    roomController.on.playerMove(data);
+    var playerMovedInput = data
+    if (typeof data != 'object') {
+      playerMovedInput = JSON.parse(data);
+    }
+    //process.emit(events.process.sendPlayerMoveToRoom, playerMovedInput);
+    socket.broadcast.to(data.roomId).emit(events.public.out.remote_player_moved, data);
+    roomController.on.playerMove(playerMovedInput);
   });
 });
 
 
 process.on(events.process.sendNewsToRoom, (roomId,data) => {
   logger.info("send a message to " + roomId)
-  io.to(roomId).emit(events.public.out.news,data);
+  io.to(roomId).emit(events.public.out.news, data);
 });
 
 process.on(events.process.sendPlayerMoveToRoom, (data) => {
   logger.info("send a message to " + data.roomId)
-  io.to(data.roomId).emit(events.public.out.remote_player_moved,data);
+  io.to(data.roomId).emit(events.public.out.remote_player_moved, data);
 });
 
 process.on(events.process.sendGameReadySignal, (data) => {
   logger.info("send a message to " + data.roomId)
-  io.to(data.roomId).emit(events.public.out.game_ready,data);
+  io.to(data.roomId).emit(events.public.out.game_ready, data);
 });
