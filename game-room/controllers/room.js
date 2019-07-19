@@ -24,13 +24,13 @@ var connected = infinispan.client({port: DATAGRID_PORT, host: DATAGRID_HOST }, {
 var onCreateGameRoom = function (data) {
 
     return new Promise(function (resolve, reject) {
-    
+
         connected.then(function (client){
             console.log("connected to datagrid");
             var roomId= uuidv4();
             var players = {keys:[]};
             var putplayersObject = client.put(roomId+"_players",JSON.stringify(players));
-    
+
             var putNewRoom = client.put(roomId+"_room","initiated");
             resolve({ roomId: roomId });
 
@@ -46,11 +46,11 @@ var onCreateGameRoom = function (data) {
             console.log("Got error: " + error);
             console.log("Got error: " + error.message);
             reject(error);
-    
+
           });
 
 
-    
+
     });
 
 
@@ -65,7 +65,7 @@ var onJoinGameRoom = function (data) {
             logger.info("connected to datagrid");
             logger.debug("RoomId requested", data.roomId)
             var getRoomStatus = client.get(data.roomId + "_room");
-        
+
             var roomValidation = getRoomStatus.then(function (value) {
               logger.debug("room: ", value);
               if(value == 'initiated'){
@@ -80,7 +80,7 @@ var onJoinGameRoom = function (data) {
           }).catch(function(error) {
             logger.error("Got error:", error);
           });
-        
+
 
     });
   };
@@ -149,7 +149,7 @@ var onJoinGameRoom = function (data) {
     var y;
     var z;
     var rotation;
-  
+
     switch (playerNumber) {
       case 1:
         x=1;
@@ -181,7 +181,7 @@ var onJoinGameRoom = function (data) {
         z=0;
         rotation=0;
     }
-  
+
     var initial_pos  = {
        playerId: playerId,
       // token,
@@ -198,7 +198,7 @@ var onJoinGameRoom = function (data) {
        speed:1,
       // state,
        rotation: rotation
-  
+
     }
     return initial_pos;
   }
@@ -218,25 +218,24 @@ var onJoinGameRoom = function (data) {
       logger.error("Got error:", error);
     });
   }
-  
-  
-  
+
+
+
   var startGameRoom = function (roomId) {
    connected.then(function (client) {
       var getPlayers = client.get(roomId + "_players");
+
       var calculateInitialPosition = getPlayers.then(function(value) {
-        logger.info('getPlayers=%s', value);
-  
+        logger.debug('Get players from Datagrid', value);
         var players = JSON.parse(value);
         process.emit(events.process.sendNewsToRoom,roomId,{ info: "Assigning player location" });
         players.keys.forEach((playerkey) => {
           var initial_position= calculateInitialLocation(roomId, players[playerkey].playerId,players[playerkey].playerNumber);
           savePlayerMove(initial_position);
         });
-  
         return client.get(roomId+"_players");
       });
-  
+
       var getPlayersPosition = calculateInitialPosition.then(
         function(value) {
           var players = JSON.parse(value);
@@ -244,25 +243,26 @@ var onJoinGameRoom = function (data) {
           players.keys.forEach((playerkey) => {
             players_keys.push(roomId+"_player_"+players[playerkey].playerId);
           });
-  
           return client.getAll(players_keys);
       });
-  
-      var sendPlayerPosition = getPlayersPosition.then(
+
+      getPlayersPosition.then(
         function(entries) {
+          logger.debug('Entries for GameReadySignal', entries);
+          process.emit(events.process.sendGameReadySignal, entries);
           entries.forEach((move) => {
             process.emit(events.process.sendPlayerMoveToRoom,JSON.parse(move.value));
           });
         }
       );
-  
+
     }).catch(function(error) {
       logger.error("Got error:", error);
     });
 
-    process.emit(events.process.sendGameReadySignal,{roomId: roomId , counter: 3})
+    //process.emit(events.process.sendGameReadySignal,{roomId: roomId , counter: 3})
   }
-  
+
 
 
 module.exports = {

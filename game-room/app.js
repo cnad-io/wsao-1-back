@@ -58,7 +58,6 @@ io.on('connection', function (socket) {
   });
 });
 
-
 process.on(events.process.sendNewsToRoom, (roomId,data) => {
   logger.info("send a message to " + roomId)
   io.to(roomId).emit(events.public.out.news, data);
