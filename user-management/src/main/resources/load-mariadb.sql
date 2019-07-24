@@ -1,0 +1,4 @@
+INSERT INTO User(id, username) VALUES ('61336330-6135-6665-2d61-6436612d3131', 'camedeir');
+INSERT INTO User(id, username) VALUES ('61336331-3166-3663-2d61-6436612d3131', 'gschmidt');
+INSERT INTO User(id, username) VALUES ('61336331-6138-3464-2d61-6436612d3131', 'mcaballol');
+INSERT INTO User(id, username) VALUES ('61336332-3366-6164-2d61-6436612d3131', 'scanales');
