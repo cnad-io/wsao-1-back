@@ -54,9 +54,7 @@ pipeline {
         }
       }
       steps {
-        sh 'printenv'
-
-        sh 'cd user-management'
+        sh 'ls -ltr'
 
         echo '### Running build and Tests ###'
         sh './mvnw package -Pnative -Dnative-image.docker-build=true'
