@@ -16,7 +16,7 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr:'10'))
     timeout(time: 15, unit: 'MINUTES')
     // ansiColor('xterm')
-    timestamps()
+    // timestamps()
   }
   stages {
     stage("prepare environment for master deploy") {
