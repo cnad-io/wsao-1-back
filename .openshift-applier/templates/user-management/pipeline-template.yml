@@ -13,17 +13,25 @@ objects:
   kind: BuildConfig
   metadata:
     labels:
+      build: ${APP_NAME}
       app: ${APP_NAME}
       system: dino-rush
       kind: quarkus
     name: ${APP_NAME}
   spec:
+    nodeSelector: {}
+    output: {}
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
     source:
       contextDir: ${GIT_CONTEXT_DIR}
       git:
         ref: ${GIT_BRANCH}
         uri: ${GIT_URL}
       type: Git
+      sourceSecret:
+        name: "${SOURCE_SECRET}"
     strategy:
       jenkinsPipelineStrategy:
         jenkinsfilePath: Jenkinsfile
@@ -52,3 +60,5 @@ parameters:
 - name: GENERIC_SECRET
   from: '[a-zA-Z0-9]{40}'
   generate: expression
+- name: SOURCE_SECRET
+  value: git-auth

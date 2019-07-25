@@ -7,12 +7,15 @@ pipeline {
     APP_NAME = "user-management"
     JENKINS_TAG = "${JOB_NAME}.${BUILD_NUMBER}".replace("/", "-")
     JOB_NAME = "${JOB_NAME}".replace("/", "-")
-    GIT_CREDENTIALS = credentials('jenkins-git-creds')
+    GIT_CREDENTIALS = credentials('dino-rush-ci-cd-git-auth')
+    GIT_DOMAIN = "github.com"
+    GIT_PROJECT = "cnad-io"
+    GIT_REPOSITORY = "wsao-1-back"
   }
   options {
     buildDiscarder(logRotator(numToKeepStr:'10'))
     timeout(time: 15, unit: 'MINUTES')
-    ansiColor('xterm')
+    // ansiColor('xterm')
     timestamps()
   }
   stages {
@@ -49,7 +52,7 @@ pipeline {
     stage("node-build") {
       agent {
         node {
-          label "jenkins-slave-npm"
+          label "master"
         }
       }
       steps {
@@ -67,7 +70,7 @@ pipeline {
           echo "Git tagging"
           sh '''
             git tag -a ${JENKINS_TAG} -m "JENKINS automated commit"
-            git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_DOMAIN}/${GIT_PROJECT}/${APP_NAME}.git --tags
+            git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_DOMAIN}/${GIT_PROJECT}/${GIT_REPOSITORY}.git --tags
           '''
         }
         failure {

@@ -58,12 +58,21 @@ objects:
     name: ${APP_NAME}
   spec:
     paused: true
+    revisionHistoryLimit: 10
     replicas: 1
     selector:
       system: dino-rush
       app: ${APP_NAME}
       kind: quarkus
     strategy:
+      activeDeadlineSeconds: 21600
+      resources:
+        limits:
+          cpu: 100m
+          memory: 100Mi
+        requests:
+          cpu: 50m
+          memory: 50Mi
       rollingParams:
         intervalSeconds: 1
         maxSurge: 25%
@@ -73,6 +82,7 @@ objects:
       type: Rolling
     template:
       metadata:
+        creationTimestamp: null
         labels:
           system: dino-rush
           app: ${APP_NAME}
@@ -96,21 +106,27 @@ objects:
           imagePullPolicy: Always
           livenessProbe:
             initialDelaySeconds: 1
+            failureThreshold: 3
             httpGet:
               path: /health
               port: 8080
               scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
             timeoutSeconds: 1
           name: ${APP_NAME}
           ports:
           - containerPort: 8080
             protocol: TCP
           readinessProbe:
+            failureThreshold: 3
             httpGet:
               path: /health
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
             timeoutSeconds: 1
           resources:
             limits:
@@ -119,7 +135,17 @@ objects:
             requests:
               cpu: ${CPU_REQUEST}
               memory: ${MEMORY_REQUEST}
-    triggers: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - type: ConfigChange
+  status: {}
 - apiVersion: v1
   kind: RoleBinding
   metadata:

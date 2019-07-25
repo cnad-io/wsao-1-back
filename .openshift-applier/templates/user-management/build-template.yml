@@ -27,6 +27,9 @@ objects:
       kind: quarkus
     name: ${APP_NAME}
   spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    postCommit: {}
     output:
       to:
         kind: ImageStreamTag
@@ -38,13 +41,16 @@ objects:
       requests:
         cpu: '${CPU_REQUEST}'
         memory: '${MEMORY_REQUEST}'
+    runPolicy: Serial
     source:
       binary: {}
       type: Binary
     strategy:
       dockerStrategy:
         dockerfilePath: src/main/docker/Dockerfile.native
-    triggers: {}
+    successfulBuildsHistoryLimit: 5
+    triggers: []
+  status: {}
 parameters:
 - name: CPU_REQUEST
   required: true

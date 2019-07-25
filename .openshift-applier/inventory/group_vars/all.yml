@@ -25,6 +25,17 @@ openshift_cluster_content:
       - base
 - object: build
   content:
+    - name: secret
+      template: "{{ inventory_dir }}/../templates/user-management/git-secret-template.yml"
+      params_from_vars:
+        SECRET_NAME: git-auth
+        USERNAME: "{{ encrypted_password | b64encode }}"
+        PASSWORD: "{{ encrypted_password | b64encode }}"
+      namespace: "{{ ci_cd_namespace }}"
+      tags:
+      - user-management
+      - secret
+      - build
     - name: pipeline
       template: "{{ inventory_dir }}/../templates/user-management/pipeline-template.yml"
       params: "{{ inventory_dir }}/../params/user-management/pipeline"
