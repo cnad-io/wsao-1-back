@@ -17,7 +17,7 @@ pipeline {
     timeout(time: 15, unit: 'MINUTES')
   }
   stages {
-    stage("Prepare environment") {
+    stage("Prepare environment Prod") {
       agent {
         node {
           label "master"
@@ -32,7 +32,7 @@ pipeline {
         }
       }
     }
-    stage("Prepare environment") {
+    stage("Prepare environment Non Prod") {
       agent {
         node {
           label "master"
