@@ -1,0 +1,54 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: pipeline-template
+  system: dino-rush
+  app: user-management
+  kind: quarkus
+metadata:
+  name: pipeline-template
+objects:
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${APP_NAME}
+      system: dino-rush
+      kind: quarkus
+    name: ${APP_NAME}
+  spec:
+    source:
+      contextDir: ${GIT_CONTEXT_DIR}
+      git:
+        ref: ${GIT_BRANCH}
+        uri: ${GIT_URL}
+      type: Git
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfilePath: Jenkinsfile
+      type: JenkinsPipeline
+    triggers:
+    - github:
+        secret: ${GITHUB_SECRET}
+      type: GitHub
+    - generic:
+        secret: ${GENERIC_SECRET}
+      type: Generic
+parameters:
+- name: APP_NAME
+  required: true
+  value: user-management
+- name: GIT_URL
+  required: true
+  value: https://github.com/cnad-io/wsao-1-back.git
+- name: GIT_BRANCH
+  required: true
+  value: develop
+- name: GIT_CONTEXT_DIR
+- name: GITHUB_SECRET
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+- name: GENERIC_SECRET
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression

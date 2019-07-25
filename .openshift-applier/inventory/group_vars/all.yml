@@ -1,0 +1,79 @@
+---
+openshift_cluster_content:
+- object: base
+  content:
+    - name: ci-cd
+      template: "{{ inventory_dir }}/../templates/project/project-request-template.yml"
+      params: "{{ inventory_dir }}/../params/project/{{ ci_cd_namespace }}"
+      action: create
+      tags:
+      - project-request
+      - base
+    - name: non-prod
+      template: "{{ inventory_dir }}/../templates/project/project-request-template.yml"
+      params: "{{ inventory_dir }}/../params/project/{{ non_prod_namespace }}"
+      action: create
+      tags:
+      - project-request
+      - base
+    - name: prod
+      template: "{{ inventory_dir }}/../templates/project/project-request-template.yml"
+      params: "{{ inventory_dir }}/../params/project/{{ prod_namespace }}"
+      action: create
+      tags:
+      - project-request
+      - base
+- object: build
+  content:
+    - name: pipeline
+      template: "{{ inventory_dir }}/../templates/user-management/pipeline-template.yml"
+      params: "{{ inventory_dir }}/../params/user-management/pipeline"
+      namespace: "{{ ci_cd_namespace }}"
+      tags:
+      - user-management
+      - pipeline
+      - build
+    - name: unique-build
+      template: "{{ inventory_dir }}/../templates/user-management/build-template.yml"
+      params: "{{ inventory_dir }}/../params/user-management/build"
+      namespace: "{{ non_prod_namespace }}"
+      tags:
+      - user-management
+      - unique-build
+      - build
+- object: deploy-non-prod
+  content:
+    - name: service
+      template: "{{ inventory_dir }}/../templates/user-management/deploy-template.yml"
+      params: "{{ inventory_dir }}/../params/user-management/deploy-non-prod"
+      namespace: "{{ non_prod_namespace }}"
+      tags:
+      - user-management
+      - service
+      - non-prod
+    - name: database
+      template: "{{ inventory_dir }}/../templates/user-management/mariadb-template.yml"
+      params: "{{ inventory_dir }}/../params/user-management/mariadb-non-prod"
+      namespace: "{{ non_prod_namespace }}"
+      tags:
+      - user-management
+      - database
+      - non-prod
+- object: deploy-prod
+  content:
+    - name: service
+      template: "{{ inventory_dir }}/../templates/user-management/deploy-template.yml"
+      params: "{{ inventory_dir }}/../params/user-management/deploy-prod"
+      namespace: "{{ prod_namespace }}"
+      tags:
+      - user-management
+      - service
+      - prod
+    - name: database
+      template: "{{ inventory_dir }}/../templates/user-management/mariadb-template.yml"
+      params: "{{ inventory_dir }}/../params/user-management/mariadb-prod"
+      namespace: "{{ prod_namespace }}"
+      tags:
+      - user-management
+      - database
+      - prod

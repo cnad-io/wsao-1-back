@@ -1,0 +1,10 @@
+---
+- name: Deploy Dino rush backend
+  hosts: app
+  vars:
+    ci_cd_namespace: dino-rush-ci-cd
+    non_prod_namespace: dino-rush-non-prod
+    prod_namespace: dino-rush-prod
+  tasks:
+  - include_role:
+      name: openshift-applier/roles/openshift-applier

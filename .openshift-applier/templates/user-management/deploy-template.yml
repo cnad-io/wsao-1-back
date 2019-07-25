@@ -1,0 +1,163 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: deploy-template
+  system: dino-rush
+  app: user-management
+  kind: quarkus
+metadata:
+  name: deploy-template
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      system: dino-rush
+      app: ${APP_NAME}
+      kind: quarkus
+    name: ${APP_NAME}
+  spec: {}
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      system: dino-rush
+      app: ${APP_NAME}
+      kind: quarkus
+    name: ${APP_NAME}
+  spec:
+    port:
+      targetPort: service
+    to:
+      kind: Service
+      name: ${APP_NAME}
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      system: dino-rush
+      app: ${APP_NAME}
+      kind: quarkus
+    name: ${APP_NAME}
+  spec:
+    ports:
+    - name: service
+      port: 8080
+    selector:
+      system: dino-rush
+      app: ${APP_NAME}
+      kind: quarkus
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      template.alpha.openshift.io/wait-for-ready: "true"
+    name: ${APP_NAME}
+  spec:
+    paused: true
+    replicas: 1
+    selector:
+      system: dino-rush
+      app: ${APP_NAME}
+      kind: quarkus
+    strategy:
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          system: dino-rush
+          app: ${APP_NAME}
+          kind: quarkus
+      spec:
+        containers:
+        - env:
+            - name: DATABASE_URL
+              value: ${DATABASE_URL}
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: database-user
+                  name: ${APP_NAME}-db
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: ${APP_NAME}-db
+          image: "docker-registry.default.svc:5000/${NAMESPACE}/${APP_NAME}:${APP_TAG}"
+          imagePullPolicy: Always
+          livenessProbe:
+            initialDelaySeconds: 1
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            timeoutSeconds: 1
+          name: ${APP_NAME}
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: ${CPU_LIMIT}
+              memory: ${MEMORY_LIMIT}
+            requests:
+              cpu: ${CPU_REQUEST}
+              memory: ${MEMORY_REQUEST}
+    triggers: {}
+- apiVersion: v1
+  kind: RoleBinding
+  metadata:
+    name: edit
+  roleRef:
+    name: edit
+  subjects:
+  - kind: ServiceAccount
+    name: jenkins
+    namespace: "${PIPELINES_NAMESPACE}"
+  userNames:
+  - system:serviceaccount:${PIPELINES_NAMESPACE}:${DEPLOYER_USER}
+parameters:
+- name: CPU_REQUEST
+  required: true
+  value: 50m
+- name: CPU_LIMIT
+  required: true
+  value: 100m
+- name: MEMORY_REQUEST
+  required: true
+  value: 100Mi
+- name: MEMORY_LIMIT
+  required: true
+  value: 200Mi
+- name: APP_NAME
+  required: true
+  value: user-management
+- name: DATABASE_URL
+  required: true
+  value: jdbc:mariadb://user-management-db:3306/userdb
+- name: APP_TAG
+  required: true
+  value: latest
+- name: NAMESPACE
+  required: true
+- name: PIPELINES_NAMESPACE
+  required: true
+- name: DEPLOYER_USER
+  required: true
+  value: jenkins

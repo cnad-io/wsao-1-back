@@ -1,0 +1,72 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: build-template
+  system: dino-rush
+  app: user-management
+  kind: quarkus
+metadata:
+  name: build-template
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: '${APP_NAME}'
+      system: dino-rush
+      kind: quarkus
+    name: '${APP_NAME}'
+  spec: {}
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${APP_NAME}
+      system: dino-rush
+      kind: quarkus
+    name: ${APP_NAME}
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: '${APP_NAME}:${BUILD_TAG}'
+    resources:
+      limits:
+        cpu: '${CPU_LIMIT}'
+        memory: '${MEMORY_LIMIT}'
+      requests:
+        cpu: '${CPU_REQUEST}'
+        memory: '${MEMORY_REQUEST}'
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      dockerStrategy:
+        dockerfilePath: src/main/docker/Dockerfile.native
+    triggers: {}
+parameters:
+- name: CPU_REQUEST
+  required: true
+  value: 100m
+- name: CPU_LIMIT
+  required: true
+  value: 200m
+- name: MEMORY_REQUEST
+  required: true
+  value: 100Mi
+- name: MEMORY_LIMIT
+  required: true
+  value: 200Mi
+- name: APP_NAME
+  required: true
+  value: user-management
+- name: BUILD_TAG
+  required: true
+  value: latest
+- name: GITHUB_SECRET
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+- name: GENERIC_SECRET
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
