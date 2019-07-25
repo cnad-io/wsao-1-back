@@ -17,7 +17,7 @@ pipeline {
     timeout(time: 15, unit: 'MINUTES')
   }
   stages {
-    stage("prepare environment for master deploy") {
+    stage("Prepare environment") {
       agent {
         node {
           label "master"
@@ -32,7 +32,7 @@ pipeline {
         }
       }
     }
-    stage("prepare environment for develop deploy") {
+    stage("Prepare environment") {
       agent {
         node {
           label "master"
@@ -47,22 +47,28 @@ pipeline {
         }
       }
     }
-    stage("Build and test code, and  build container image as well") {
+    stage("Build and test code") {
       agent {
         node {
           label "master"
         }
       }
       steps {
-        sh 'ls -ltr'
-
         echo '### Running build and Tests ###'
-        sh './mvnw package -Pnative -Dnative-image.docker-build=true'
+        sh '''
+          ls -ltr
+          cd user-management/
+          ./mvnw package -Pnative -Dnative-image.docker-build=true
+          ls -ltr
+        '''
 
         echo '### Create Linux Container Image from package ###'
         sh '''
+          ls -ltr
+          cd user-management/
           oc patch bc ${APP_NAME} -p "{\\"spec\\":{\\"output\\":{\\"to\\":{\\"kind\\":\\"ImageStreamTag\\",\\"name\\":\\"${APP_NAME}:${JENKINS_TAG}\\"}}}}" -n ${PIPELINES_NAMESPACE}
           oc start-build ${APP_NAME} --from-dir=. --follow -n ${PIPELINES_NAMESPACE}
+          ls -ltr
         '''
       }
       post {
@@ -82,7 +88,7 @@ pipeline {
         }
       }
     }
-    stage("Deploy container image") {
+    stage("Deploy") {
       agent {
         node {
           label "master"
