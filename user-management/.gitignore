@@ -3,7 +3,6 @@
 .classpath
 .settings/
 bin/
-.sts4-cache/
 
 # IntelliJ
 .idea
@@ -16,6 +15,8 @@ nb-configuration.xml
 
 # Visual Studio Code
 .vscode
+.sts4-cache/
+ObjectStore/
 
 # OSX
 .DS_Store
@@ -34,3 +35,4 @@ pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 release.properties
+user-management.zip
