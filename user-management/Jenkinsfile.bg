@@ -65,7 +65,7 @@ pipeline {
         echo '### set image for deployment ###'
         sh '''
           oc set image dc/${APP_NAME} ${APP_NAME}=docker-registry.default.svc:5000/${NON_PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${NON_PROD_NAMESPACE}
-          oc rollout latest dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}
+          oc rollout resume dc/${APP_NAME} -n ${NON_PROD_NAMESPACE} 2> /dev/null || oc rollout latest dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}
         '''
         echo '### Verify OCP Deployment ###'
         openshiftVerifyDeployment depCfg: env.APP_NAME,
@@ -118,7 +118,8 @@ pipeline {
         sh '''
           oc set image dc/${APP_NAME}-${NOT_ACTIVE_MODE} \
             ${APP_NAME}=docker-registry.default.svc:5000/${PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${PROD_NAMESPACE}
-          oc rollout latest dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}
+          oc rollout resume dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE} 2> /dev/null \
+            || oc rollout latest dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}
         '''
         echo '### Verify OCP Deployment ###'
         openshiftVerifyDeployment depCfg: "${APP_NAME}-${NOT_ACTIVE_MODE}",
