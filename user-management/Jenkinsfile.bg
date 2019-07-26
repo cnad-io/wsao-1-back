@@ -9,9 +9,6 @@ pipeline {
     JENKINS_TAG = "${JOB_NAME}.${BUILD_NUMBER}".replace("/", "-")
     JOB_NAME = "${JOB_NAME}".replace("/", "-")
     GIT_CREDENTIALS = credentials('dino-rush-ci-cd-git-auth')
-    GIT_DOMAIN = "github.com"
-    GIT_PROJECT = "cnad-io"
-    GIT_REPOSITORY = "wsao-1-back"
   }
   options {
     buildDiscarder(logRotator(numToKeepStr:'10'))
@@ -45,6 +42,7 @@ pipeline {
         success {
           echo "Git tagging"
           sh '''
+            printenv
             git config --local user.email "jenkins-pipeline@example.com"
             git config --local user.name "Jenkins Pipeline"
             git tag -a ${JENKINS_TAG} -m "JENKINS automated commit"
