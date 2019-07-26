@@ -141,10 +141,11 @@ pipeline {
         expression { GIT_BRANCH ==~ /(.*master)/ }
       }
       steps {
+        def userInput = false
         try {
           timeout(time: 1, unit: "MINUTES") {
-            def userInput = false
-            def userInput = input(id: 'Proceed1', message: 'Promote build?', parameters: [[$class: 'BooleanParameterDefinition', defaultValue: true, description: '', name: 'Please confirm you agree with this']])
+
+            def userInput = input message: 'Promote build?', parameters: [[$class: 'PersistentBooleanParameterDefinition', defaultValue: true, description: '', name: 'Please confirm you agree with this']]
             echo 'userInput: ' + userInput
 
             if (userInput == true) {
