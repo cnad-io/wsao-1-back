@@ -21,7 +21,7 @@ pipeline {
     stage("Build and test code") {
       agent {
         node {
-          label "jenkins-slave-maven"
+          label "maven"
         }
       }
       steps {
