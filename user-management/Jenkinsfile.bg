@@ -41,13 +41,12 @@ pipeline {
         }
         success {
           echo "Git tagging"
+          env.PUSH_URL="https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_URL}".replace("@https://", "@")
           sh '''
-            printenv
             git config --local user.email "jenkins-pipeline@example.com"
             git config --local user.name "Jenkins Pipeline"
             git tag -a ${JENKINS_TAG} -m "JENKINS automated commit"
-            URL="https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_URL}".replace("@https://", "@")
-            git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${URL} --tags
+            git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${PUSH_URL} --tags
           '''
         }
         failure {
@@ -111,6 +110,7 @@ pipeline {
       steps {
         echo '### tag image for namespace ###'
         sh '''
+          printenv
           oc tag ${NON_PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} ${PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${PROD_NAMESPACE}
         '''
         echo '### set env vars and image for deployment ###'
