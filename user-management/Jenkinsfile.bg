@@ -46,7 +46,8 @@ pipeline {
             git config --local user.email "jenkins-pipeline@example.com"
             git config --local user.name "Jenkins Pipeline"
             git tag -a ${JENKINS_TAG} -m "JENKINS automated commit"
-            git push "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_URL}".replace("@https://", "@") --tags
+            URL="https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_URL}".replace("@https://", "@")
+            git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${URL} --tags
           '''
         }
         failure {
