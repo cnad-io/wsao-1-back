@@ -2,13 +2,13 @@
 openshift_cluster_content:
 - object: base
   content:
-    - name: ci-cd
-      template: "{{ inventory_dir }}/../templates/project/project-request-template.yml"
-      params: "{{ inventory_dir }}/../params/project/{{ ci_cd_namespace }}"
-      action: create
-      tags:
-      - project-request
-      - base
+    # - name: ci-cd
+    #   template: "{{ inventory_dir }}/../templates/project/project-request-template.yml"
+    #   params: "{{ inventory_dir }}/../params/project/{{ ci_cd_namespace }}"
+    #   action: create
+    #   tags:
+    #   - project-request
+    #   - base
     - name: non-prod
       template: "{{ inventory_dir }}/../templates/project/project-request-template.yml"
       params: "{{ inventory_dir }}/../params/project/{{ non_prod_namespace }}"
@@ -31,7 +31,8 @@ openshift_cluster_content:
         SECRET_NAME: git-auth
         USERNAME: "{{ encrypted_password | b64encode }}"
         PASSWORD: "{{ encrypted_password | b64encode }}"
-      namespace: "{{ ci_cd_namespace }}"
+      # namespace: "{{ ci_cd_namespace }}"
+      namespace: "{{ non_prod_namespace }}"
       tags:
       - user-management
       - secret
@@ -39,7 +40,8 @@ openshift_cluster_content:
     - name: pipeline
       template: "{{ inventory_dir }}/../templates/user-management/pipeline-template.yml"
       params: "{{ inventory_dir }}/../params/user-management/pipeline"
-      namespace: "{{ ci_cd_namespace }}"
+      # namespace: "{{ ci_cd_namespace }}"
+      namespace: "{{ non_prod_namespace }}"
       tags:
       - user-management
       - pipeline
