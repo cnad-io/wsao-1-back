@@ -72,12 +72,22 @@ openshift_cluster_content:
       - non-prod
 - object: deploy-prod
   content:
-    - name: service
-      template: "{{ inventory_dir }}/../templates/user-management/deploy-template.yml"
-      params: "{{ inventory_dir }}/../params/user-management/deploy-prod"
+    - name: service-blue
+      template: "{{ inventory_dir }}/../templates/user-management/deploy-bg-template.yml"
+      params: "{{ inventory_dir }}/../params/user-management/deploy-prod-blue"
       namespace: "{{ prod_namespace }}"
       tags:
       - user-management
+      - blue
+      - service
+      - prod
+    - name: service-green
+      template: "{{ inventory_dir }}/../templates/user-management/deploy-bg-template.yml"
+      params: "{{ inventory_dir }}/../params/user-management/deploy-prod-green"
+      namespace: "{{ prod_namespace }}"
+      tags:
+      - user-management
+      - green
       - service
       - prod
     - name: database

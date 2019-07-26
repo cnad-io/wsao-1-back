@@ -4,3 +4,4 @@
 # MEMORY_LIMIT=
 APP_NAME=user-management
 # BUILD_TAG=
+# MODE=jvm|native

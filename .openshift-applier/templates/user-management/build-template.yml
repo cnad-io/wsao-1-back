@@ -47,7 +47,7 @@ objects:
       type: Binary
     strategy:
       dockerStrategy:
-        dockerfilePath: src/main/docker/Dockerfile.native
+        dockerfilePath: src/main/docker/Dockerfile.${MODE}
     successfulBuildsHistoryLimit: 5
     triggers: []
   status: {}
@@ -76,3 +76,6 @@ parameters:
 - name: GENERIC_SECRET
   from: '[a-zA-Z0-9]{40}'
   generate: expression
+- name: MODE
+  required: true
+  value: jvm

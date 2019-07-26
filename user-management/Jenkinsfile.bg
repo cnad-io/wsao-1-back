@@ -1,0 +1,205 @@
+pipeline {
+  agent {
+    label "master"
+  }
+  environment {
+    NON_PROD_NAMESPACE = "dino-rush-non-prod"
+    PROD_NAMESPACE = "dino-rush-prod"
+    APP_NAME = "user-management"
+    JENKINS_TAG = "${JOB_NAME}.${BUILD_NUMBER}".replace("/", "-")
+    JOB_NAME = "${JOB_NAME}".replace("/", "-")
+    GIT_CREDENTIALS = credentials('dino-rush-ci-cd-git-auth')
+    GIT_DOMAIN = "github.com"
+    GIT_PROJECT = "cnad-io"
+    GIT_REPOSITORY = "wsao-1-back"
+  }
+  options {
+    buildDiscarder(logRotator(numToKeepStr:'10'))
+    timeout(time: 20, unit: 'MINUTES')
+  }
+  stages {
+    stage("Build and test code") {
+      agent {
+        node {
+          label "jenkins-slave-maven"
+        }
+      }
+      steps {
+        echo '### Running build and Tests ###'
+        sh '''
+          cd user-management/
+          ./mvnw package
+        '''
+
+        echo '### Create Linux Container Image from package ###'
+        sh '''
+          oc patch bc ${APP_NAME} -p "{\\"spec\\":{\\"output\\":{\\"to\\":{\\"kind\\":\\"ImageStreamTag\\",\\"name\\":\\"${APP_NAME}:${JENKINS_TAG}\\"}}}}" -n ${NON_PROD_NAMESPACE}
+          oc start-build ${APP_NAME} --from-dir=./user-management/ --follow -n ${NON_PROD_NAMESPACE}
+        '''
+      }
+      post {
+        always {
+          archive "user-management/**"
+          junit 'user-management/target/surefire-reports/TEST-*.xml'
+        }
+        success {
+          echo "Git tagging"
+          sh '''
+            git tag -a ${JENKINS_TAG} -m "JENKINS automated commit"
+            git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_DOMAIN}/${GIT_PROJECT}/${GIT_REPOSITORY}.git --tags
+          '''
+        }
+        failure {
+          echo "FAILURE"
+        }
+      }
+    }
+    stage("Deploy Non Prod") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      steps {
+        echo '### set image for deployment ###'
+        sh '''
+          oc set image dc/${APP_NAME} ${APP_NAME}=docker-registry.default.svc:5000/${NON_PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${NON_PROD_NAMESPACE}
+          oc rollout latest dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}
+        '''
+        echo '### Verify OCP Deployment ###'
+        openshiftVerifyDeployment depCfg: env.APP_NAME,
+          namespace: env.NON_PROD_NAMESPACE,
+          replicaCount: '1',
+          verbose: 'false',
+          verifyReplicaCount: 'true',
+          waitTime: '',
+          waitUnit: 'sec'
+      }
+    }
+    stage("Prepare B/G Deploy") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      when {
+        expression { GIT_BRANCH ==~ /(.*master)/ }
+      }
+      steps {
+        env.ACTIVE_MODE = sh '''
+          oc get pod --selector=app=${APP_NAME} -o jsonpath='{ .items[0].metadata.labels.mode }' -n ${PROD_NAMESPACE}
+        '''
+        if (env.ACTIVE_MODE == 'blue') {
+          env.NOT_ACTIVE_MODE = 'green'
+        } else {
+          env.NOT_ACTIVE_MODE = 'blue'
+        }
+      }
+    }
+    stage("B/G Deploy Prod") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      when {
+        expression { GIT_BRANCH ==~ /(.*master)/ }
+      }
+      steps {
+        echo '### tag image for namespace ###'
+        sh '''
+          oc tag ${NON_PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} ${PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${PROD_NAMESPACE}
+        '''
+        echo '### set env vars and image for deployment ###'
+        sh '''
+          oc set image dc/${APP_NAME}-${NOT_ACTIVE_MODE} \
+            ${APP_NAME}=docker-registry.default.svc:5000/${PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${PROD_NAMESPACE}
+          oc rollout latest dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}
+        '''
+        echo '### Verify OCP Deployment ###'
+        openshiftVerifyDeployment depCfg: "${APP_NAME}-${NOT_ACTIVE_MODE}",
+          namespace: env.PROD_NAMESPACE,
+          replicaCount: '1',
+          verbose: 'false',
+          verifyReplicaCount: 'true',
+          waitTime: '',
+          waitUnit: 'sec'
+
+        echo '### Change balance configuration ###'
+        sh '''
+          oc set route-backends ${APP_NAME} ${APP_NAME}-${ACTIVE_MODE}=0 ${APP_NAME}-${NOT_ACTIVE_MODE}=0 -n ${PROD_NAMESPACE}
+        '''
+      }
+    }
+    stage("Approve") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      when {
+        expression { GIT_BRANCH ==~ /(.*master)/ }
+      }
+      steps {
+        try {
+          timeout(time: 1, unit: "MINUTES") {
+            def userInput = false
+            def userInput = input(id: 'Proceed1', message: 'Promote build?', parameters: [[$class: 'BooleanParameterDefinition', defaultValue: true, description: '', name: 'Please confirm you agree with this']])
+            echo 'userInput: ' + userInput
+
+            if (userInput == true) {
+              // do action
+              echo "Action was accepted."
+              env.WAS_APPROVED = "true"
+            } else {
+              // not do action
+              echo "Action was aborted."
+              env.WAS_APPROVED = "false"
+            }
+          }
+        } catch (error) {
+          echo "Action was aborted by timeout."
+          env.WAS_APPROVED = "false"
+        }
+      }
+    }
+    stage("Idle Older Deploy") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      when {
+        expression { GIT_BRANCH ==~ /(.*master)/ }
+        expression { WAS_APPROVED == "true" }
+      }
+      steps {
+        echo '### Idle older deployment ###'
+        sh '''
+          oc idle ${APP_NAME}-${ACTIVE_MODE} -n ${PROD_NAMESPACE}
+        '''
+      }
+    }
+    stage("Canceling deploy") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      when {
+        expression { GIT_BRANCH ==~ /(.*master)/ }
+        expression { WAS_APPROVED == "false" }
+      }
+      steps {
+        echo '### Return balance configuration ###'
+        sh '''
+          oc set route-backends ${APP_NAME} ${APP_NAME}-${ACTIVE_MODE}=100 -n ${PROD_NAMESPACE}
+        '''
+        echo '### Idle latest deployment ###'
+        sh '''
+          oc idle ${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}
+        '''
+      }
+    }
+  }
+}

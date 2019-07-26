@@ -39,7 +39,7 @@ pipeline {
         }
       }
       when {
-        expression { GIT_BRANCH ==~ /(.*develop)/ }
+        expression { GIT_BRANCH ==~ /(.*release\/.*)/ }
       }
       steps {
         script {
@@ -53,12 +53,15 @@ pipeline {
           label "master"
         }
       }
+      when {
+        expression { GIT_BRANCH ==~ /(.*release\/.*)/ }
+      }
       steps {
         echo '### Running build and Tests ###'
         sh '''
           ls -ltr
           cd user-management/
-          ./mvnw package -Pnative -Dnative-image.docker-build=true
+          ./mvnw package
           ls -ltr
         '''
 
@@ -95,7 +98,7 @@ pipeline {
         }
       }
       when {
-        expression { GIT_BRANCH ==~ /(.*master|.*develop)/ }
+        expression { GIT_BRANCH ==~ /(.*master|.*release\/.*)/ }
       }
       steps {
         echo '### tag image for namespace ###'

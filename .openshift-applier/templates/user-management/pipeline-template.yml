@@ -34,7 +34,7 @@ objects:
         name: "${SOURCE_SECRET}"
     strategy:
       jenkinsPipelineStrategy:
-        jenkinsfilePath: Jenkinsfile
+        jenkinsfilePath: Jenkinsfile.bg
       type: JenkinsPipeline
     triggers:
     - github:

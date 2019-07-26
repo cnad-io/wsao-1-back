@@ -2,12 +2,12 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 labels:
-  template: deploy-template
+  template: deploy-bg-template
   system: dino-rush
   app: user-management
   kind: quarkus
 metadata:
-  name: deploy-template
+  name: deploy-bg-template
 objects:
 - apiVersion: v1
   kind: ImageStream
@@ -28,10 +28,10 @@ objects:
     name: ${APP_NAME}
   spec:
     port:
-      targetPort: service
+      targetPort: 8080-tcp
     to:
       kind: Service
-      name: ${APP_NAME}
+      name: ${APP_NAME}-${DEPLOYMENT_MODE}
       weight: 100
     wildcardPolicy: None
 - apiVersion: v1
@@ -41,15 +41,17 @@ objects:
       system: dino-rush
       app: ${APP_NAME}
       kind: quarkus
-    name: ${APP_NAME}
+      mode: ${DEPLOYMENT_MODE}
+    name: ${APP_NAME}-${DEPLOYMENT_MODE}
   spec:
     ports:
-    - name: service
+    - name: 8080-tcp
       port: 8080
     selector:
       system: dino-rush
       app: ${APP_NAME}
       kind: quarkus
+      mode: ${DEPLOYMENT_MODE}
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -57,9 +59,10 @@ objects:
       system: dino-rush
       app: ${APP_NAME}
       kind: quarkus
+      mode: ${DEPLOYMENT_MODE}
     annotations:
       template.alpha.openshift.io/wait-for-ready: "true"
-    name: ${APP_NAME}
+    name: ${APP_NAME}-${DEPLOYMENT_MODE}
   spec:
     paused: true
     revisionHistoryLimit: 10
@@ -68,6 +71,7 @@ objects:
       system: dino-rush
       app: ${APP_NAME}
       kind: quarkus
+      mode: ${DEPLOYMENT_MODE}
     strategy:
       activeDeadlineSeconds: 21600
       resources:
@@ -91,6 +95,7 @@ objects:
           system: dino-rush
           app: ${APP_NAME}
           kind: quarkus
+          mode: ${DEPLOYMENT_MODE}
       spec:
         containers:
         - env:
@@ -120,7 +125,8 @@ objects:
             timeoutSeconds: 1
           name: ${APP_NAME}
           ports:
-          - containerPort: 8080
+          - name: 8080-tcp
+            containerPort: 8080
             protocol: TCP
           readinessProbe:
             failureThreshold: 3
@@ -191,3 +197,6 @@ parameters:
 - name: DEPLOYER_USER
   required: true
   value: jenkins
+- name: DEPLOYMENT_MODE
+  required: true
+  value: blue
