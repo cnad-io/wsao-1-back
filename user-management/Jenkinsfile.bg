@@ -143,28 +143,30 @@ pipeline {
         expression { GIT_BRANCH ==~ /(.*master)/ }
       }
       steps {
-        def userInput = false
-        try {
-          timeout(time: 1, unit: "MINUTES") {
-            userInput = input(
-              id: 'Proceed1', message: 'Was this successful?', parameters: [
-              [$class: 'BooleanParameterDefinition', defaultValue: true, description: '', name: 'Please confirm you agree with this']
-              ])
-            echo 'userInput: ' + userInput
+        script {
+          def userInput = false
+          try {
+            timeout(time: 1, unit: "MINUTES") {
+              userInput = input(
+                id: 'Proceed1', message: 'Was this successful?', parameters: [
+                [$class: 'BooleanParameterDefinition', defaultValue: true, description: '', name: 'Please confirm you agree with this']
+                ])
+              echo 'userInput: ' + userInput
 
-            if (userInput == true) {
-              // do action
-              echo "Action was accepted."
-              env.WAS_APPROVED = "true"
-            } else {
-              // not do action
-              echo "Action was aborted."
-              env.WAS_APPROVED = "false"
+              if (userInput == true) {
+                // do action
+                echo "Action was accepted."
+                env.WAS_APPROVED = "true"
+              } else {
+                // not do action
+                echo "Action was aborted."
+                env.WAS_APPROVED = "false"
+              }
             }
+          } catch (error) {
+            echo "Action was aborted by timeout."
+            env.WAS_APPROVED = "false"
           }
-        } catch (error) {
-          echo "Action was aborted by timeout."
-          env.WAS_APPROVED = "false"
         }
       }
     }
