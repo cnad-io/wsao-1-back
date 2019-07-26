@@ -38,18 +38,6 @@ pipeline {
           archive "user-management/**"
           junit 'user-management/target/surefire-reports/TEST-*.xml'
         }
-        /*success {
-          script {
-            env.PUSH_GIT_URL = "${GIT_URL}".replace("://", "://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@")
-          }
-          echo "Git tagging"
-          sh '''
-            git config --local user.email "jenkins-pipeline@example.com"
-            git config --local user.name "Jenkins Pipeline"
-            git tag -a ${JENKINS_TAG} -m "JENKINS automated commit"
-            git push ${PUSH_GIT_URL} --tags
-          '''
-        }*/
         failure {
           echo "FAILURE"
         }
