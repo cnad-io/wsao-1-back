@@ -86,13 +86,15 @@ pipeline {
         expression { GIT_BRANCH ==~ /(.*master)/ }
       }
       steps {
-        env.ACTIVE_MODE = sh '''
-          oc get pod --selector=app=${APP_NAME} -o jsonpath='{ .items[0].metadata.labels.mode }' -n ${PROD_NAMESPACE}
-        '''
-        if (env.ACTIVE_MODE == 'blue') {
-          env.NOT_ACTIVE_MODE = 'green'
-        } else {
-          env.NOT_ACTIVE_MODE = 'blue'
+        script {
+          env.ACTIVE_MODE = sh '''
+            oc get pod --selector=app=${APP_NAME} -o jsonpath='{ .items[0].metadata.labels.mode }' -n ${PROD_NAMESPACE}
+          '''
+          if (env.ACTIVE_MODE == 'blue') {
+            env.NOT_ACTIVE_MODE = 'green'
+          } else {
+            env.NOT_ACTIVE_MODE = 'blue'
+          }
         }
       }
     }
