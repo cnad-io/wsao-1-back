@@ -40,8 +40,10 @@ pipeline {
           junit 'user-management/target/surefire-reports/TEST-*.xml'
         }
         success {
+          script {
+            env.PUSH_URL="https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_URL}".replace("@https://", "@")
+          }
           echo "Git tagging"
-          env.PUSH_URL="https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_URL}".replace("@https://", "@")
           sh '''
             git config --local user.email "jenkins-pipeline@example.com"
             git config --local user.name "Jenkins Pipeline"
