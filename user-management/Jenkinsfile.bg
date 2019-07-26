@@ -6,8 +6,7 @@ pipeline {
     NON_PROD_NAMESPACE = "dino-rush-non-prod"
     PROD_NAMESPACE = "dino-rush-prod"
     APP_NAME = "user-management"
-    JENKINS_TAG = "${JOB_NAME}.${BUILD_NUMBER}".replace("/", "-")
-    JOB_NAME = "${JOB_NAME}".replace("/", "-")
+    JENKINS_TAG = "v${BUILD_NUMBER}".replace("/", "-")
     GIT_CREDENTIALS = credentials('dino-rush-ci-cd-git-auth')
   }
   options {
@@ -40,16 +39,12 @@ pipeline {
           junit 'user-management/target/surefire-reports/TEST-*.xml'
         }
         success {
-          script {
-            env.PUSH_URL="https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_URL}".replace("@https://", "@")
-          }
           echo "Git tagging"
           sh '''
             git config --local user.email "jenkins-pipeline@example.com"
             git config --local user.name "Jenkins Pipeline"
             git tag -a ${JENKINS_TAG} -m "JENKINS automated commit"
-            echo "$GIT_CREDENTIALS_USR - $GIT_CREDENTIALS_PSW - $PUSH_URL"
-            git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${PUSH_URL} --tags
+            git push ${GIT_URL} --tags
           '''
         }
         failure {
