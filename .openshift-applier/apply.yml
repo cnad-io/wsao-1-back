@@ -1,10 +1,10 @@
 ---
-- name: Deploy Dino rush backend
+- name: Deploy Dino Dush backend
   hosts: app
   vars:
-    ci_cd_namespace: dino-rush-ci-cd
-    non_prod_namespace: dino-rush-non-prod
-    prod_namespace: dino-rush-prod
+    # ci_cd_namespace: dino-dush-ci-cd
+    non_prod_namespace: dino-dush-non-prod
+    prod_namespace: dino-dush-prod
   tasks:
   - include_vars: "{{ inventory_dir }}/../encrypted-vars.yml"
   - include_role:

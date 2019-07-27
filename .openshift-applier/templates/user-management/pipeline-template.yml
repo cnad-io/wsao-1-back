@@ -3,7 +3,7 @@ apiVersion: template.openshift.io/v1
 kind: Template
 labels:
   template: pipeline-template
-  system: dino-rush
+  system: dino-dush
   app: user-management
   kind: quarkus
 metadata:
@@ -15,7 +15,7 @@ objects:
     labels:
       build: ${APP_NAME}
       app: ${APP_NAME}
-      system: dino-rush
+      system: dino-dush
       kind: quarkus
     name: ${APP_NAME}
   spec:
@@ -34,7 +34,7 @@ objects:
         name: "${SOURCE_SECRET}"
     strategy:
       jenkinsPipelineStrategy:
-        jenkinsfilePath: Jenkinsfile.bg
+        jenkinsfilePath: Jenkinsfile
       type: JenkinsPipeline
     triggers:
     - github:

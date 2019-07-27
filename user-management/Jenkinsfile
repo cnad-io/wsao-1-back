@@ -3,21 +3,78 @@ pipeline {
     label "master"
   }
   environment {
-    PIPELINES_NAMESPACE = "dino-rush-ci-cd"
+    NON_PROD_NAMESPACE = "dino-dush-non-prod"
+    PROD_NAMESPACE = "dino-dush-prod"
     APP_NAME = "user-management"
-    JENKINS_TAG = "${JOB_NAME}.${BUILD_NUMBER}".replace("/", "-")
-    JOB_NAME = "${JOB_NAME}".replace("/", "-")
-    GIT_CREDENTIALS = credentials('dino-rush-ci-cd-git-auth')
-    GIT_DOMAIN = "github.com"
-    GIT_PROJECT = "cnad-io"
-    GIT_REPOSITORY = "wsao-1-back"
+    JENKINS_TAG = "v${BUILD_NUMBER}".replace("/", "-")
+    GIT_CREDENTIALS = credentials('dino-dush-non-prod-git-auth')
   }
   options {
     buildDiscarder(logRotator(numToKeepStr:'10'))
-    timeout(time: 15, unit: 'MINUTES')
+    timeout(time: 20, unit: 'MINUTES')
   }
   stages {
-    stage("Prepare environment Prod") {
+    stage("Build and test code") {
+      agent {
+        node {
+          label "maven"
+        }
+      }
+      steps {
+        echo 'Running build and tests'
+        sh '''
+          cd user-management/
+          ./mvnw package
+        '''
+
+        echo 'Create container image from package'
+        sh '''
+          oc patch bc ${APP_NAME} -p "{\\"spec\\":{\\"output\\":{\\"to\\":{\\"kind\\":\\"ImageStreamTag\\",\\"name\\":\\"${APP_NAME}:${JENKINS_TAG}\\"}}}}" -n ${NON_PROD_NAMESPACE}
+          oc start-build ${APP_NAME} --from-dir=./user-management/ --follow -n ${NON_PROD_NAMESPACE}
+        '''
+      }
+      post {
+        always {
+          // archive "user-management/**"
+          junit 'user-management/target/surefire-reports/TEST-*.xml'
+        }
+        failure {
+          echo "FAILURE"
+        }
+      }
+    }
+    stage("Deploy Non Prod") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      steps {
+        echo 'Set image for deployment'
+        sh '''
+          oc set image dc/${APP_NAME} ${APP_NAME}=docker-registry.default.svc:5000/${NON_PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${NON_PROD_NAMESPACE}
+        '''
+
+        script {
+          try {
+            echo 'Rollout deployment'
+            ssh 'oc rollout resume dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
+          } catch (error) {
+            ssh 'oc rollout latest dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
+          }
+        }
+
+        echo 'Verify OCP deployment'
+        openshiftVerifyDeployment depCfg: env.APP_NAME,
+          namespace: env.NON_PROD_NAMESPACE,
+          replicaCount: '1',
+          verbose: 'false',
+          verifyReplicaCount: 'true',
+          waitTime: '',
+          waitUnit: 'sec'
+      }
+    }
+    stage("Prepare B/G Deploy") {
       agent {
         node {
           label "master"
@@ -28,96 +85,144 @@ pipeline {
       }
       steps {
         script {
-          env.PROJECT_NAMESPACE = "dino-rush-prod"
-        }
-      }
-    }
-    stage("Prepare environment Non Prod") {
-      agent {
-        node {
-          label "master"
-        }
-      }
-      when {
-        expression { GIT_BRANCH ==~ /(.*release\/.*)/ }
-      }
-      steps {
-        script {
-          env.PROJECT_NAMESPACE = "dino-rush-non-prod"
-        }
-      }
-    }
-    stage("Build and test code") {
-      agent {
-        node {
-          label "master"
-        }
-      }
-      when {
-        expression { GIT_BRANCH ==~ /(.*release\/.*)/ }
-      }
-      steps {
-        echo '### Running build and Tests ###'
-        sh '''
-          ls -ltr
-          cd user-management/
-          ./mvnw package
-          ls -ltr
-        '''
-
-        echo '### Create Linux Container Image from package ###'
-        sh '''
-          ls -ltr
-          cd user-management/
-          oc patch bc ${APP_NAME} -p "{\\"spec\\":{\\"output\\":{\\"to\\":{\\"kind\\":\\"ImageStreamTag\\",\\"name\\":\\"${APP_NAME}:${JENKINS_TAG}\\"}}}}" -n ${PIPELINES_NAMESPACE}
-          oc start-build ${APP_NAME} --from-dir=. --follow -n ${PIPELINES_NAMESPACE}
-          ls -ltr
-        '''
-      }
-      post {
-        always {
-          archive "**"
-          junit 'target/surefire-reports/TEST-*.xml'
-        }
-        success {
-          echo "Git tagging"
-          sh '''
-            git tag -a ${JENKINS_TAG} -m "JENKINS automated commit"
-            git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@${GIT_DOMAIN}/${GIT_PROJECT}/${GIT_REPOSITORY}.git --tags
+          echo 'Get active mode'
+          env.ACTIVE_MODE = sh '''
+            oc get pod --selector=app=${APP_NAME} -o jsonpath='{ .items[0].metadata.labels.mode }' -n ${PROD_NAMESPACE}
           '''
-        }
-        failure {
-          echo "FAILURE"
+          if (env.ACTIVE_MODE == '') {
+            env.ACTIVE_MODE = 'blue'
+          }
+          echo "Active mode: ${ACTIVE_MODE}"
+          if (env.ACTIVE_MODE == 'blue') {
+            env.NOT_ACTIVE_MODE = 'green'
+          } else {
+            env.NOT_ACTIVE_MODE = 'blue'
+          }
+          echo "Not Active mode: ${NOT_ACTIVE_MODE}"
         }
       }
     }
-    stage("Deploy") {
+    stage("B/G Deploy Prod") {
       agent {
         node {
           label "master"
         }
       }
       when {
-        expression { GIT_BRANCH ==~ /(.*master|.*release\/.*)/ }
+        expression { GIT_BRANCH ==~ /(.*master)/ }
       }
       steps {
-        echo '### tag image for namespace ###'
+        echo 'Tag image for namespace'
         sh '''
-          oc tag ${PIPELINES_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} ${PROJECT_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${PROJECT_NAMESPACE}
+          printenv
+          oc tag ${NON_PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} ${PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${PROD_NAMESPACE}
         '''
         echo '### set env vars and image for deployment ###'
         sh '''
-          oc set image dc/${APP_NAME} ${APP_NAME}=docker-registry.default.svc:5000/${PROJECT_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${PROJECT_NAMESPACE}
-          oc rollout latest dc/${APP_NAME} -n ${PROJECT_NAMESPACE}
+          oc set image dc/${APP_NAME}-${NOT_ACTIVE_MODE} \
+            ${APP_NAME}=docker-registry.default.svc:5000/${PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${PROD_NAMESPACE}
         '''
+        script {
+          try {
+            echo 'Rollout deployment'
+            ssh 'oc rollout resume dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
+          } catch (error) {
+            ssh 'oc rollout latest dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
+          }
+        }
+
         echo '### Verify OCP Deployment ###'
-        openshiftVerifyDeployment depCfg: env.APP_NAME,
-          namespace: env.PROJECT_NAMESPACE,
+        openshiftVerifyDeployment depCfg: "${APP_NAME}-${NOT_ACTIVE_MODE}",
+          namespace: env.PROD_NAMESPACE,
           replicaCount: '1',
           verbose: 'false',
           verifyReplicaCount: 'true',
           waitTime: '',
           waitUnit: 'sec'
+
+        echo '### Change balance configuration ###'
+        sh '''
+          oc set route-backends ${APP_NAME} ${APP_NAME}-${ACTIVE_MODE}=0 ${APP_NAME}-${NOT_ACTIVE_MODE}=0 -n ${PROD_NAMESPACE}
+        '''
+      }
+    }
+    stage("Approve") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      when {
+        expression { GIT_BRANCH ==~ /(.*master)/ }
+      }
+      steps {
+        script {
+          def userInput = false
+          try {
+            timeout(time: 1, unit: "MINUTES") {
+              userInput = input(
+                id: 'Proceed1', message: 'Was this successful?', parameters: [
+                [$class: 'BooleanParameterDefinition', defaultValue: true, description: '', name: 'Please confirm you agree with this']
+                ])
+              echo 'userInput: ' + userInput
+
+              if (userInput == true) {
+                // do action
+                echo "Action was accepted."
+                env.WAS_APPROVED = "true"
+              } else {
+                // not do action
+                echo "Action was aborted."
+                env.WAS_APPROVED = "false"
+              }
+            }
+          } catch (error) {
+            echo "Action was aborted by timeout."
+            env.WAS_APPROVED = "false"
+          }
+        }
+      }
+    }
+    stage("Idle Older Deploy") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      when {
+        and {
+          expression { GIT_BRANCH ==~ /(.*master)/ }
+          expression { WAS_APPROVED == 'true' }
+        }
+      }
+      steps {
+        echo 'Idle older deployment'
+        sh '''
+          oc idle ${APP_NAME}-${ACTIVE_MODE} -n ${PROD_NAMESPACE}
+        '''
+      }
+    }
+    stage("Canceling deploy") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      when {
+        and {
+          expression { GIT_BRANCH ==~ /(.*master)/ }
+          expression { WAS_APPROVED == 'false' }
+        }
+      }
+      steps {
+        echo 'Return balance configuration'
+        sh '''
+          oc set route-backends ${APP_NAME} ${APP_NAME}-${ACTIVE_MODE}=100 -n ${PROD_NAMESPACE}
+        '''
+        echo 'Idle latest deployment'
+        sh '''
+          oc idle ${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}
+        '''
       }
     }
   }

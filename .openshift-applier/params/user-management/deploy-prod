@@ -4,5 +4,5 @@
 # MEMORY_LIMIT=
 APP_NAME=user-management
 DATABASE_URL=jdbc:mariadb://user-management-db:3306/userdb
-NAMESPACE=dino-rush-prod
-PIPELINES_NAMESPACE=dino-rush-ci-cd
+NAMESPACE=dino-dush-prod
+PIPELINES_NAMESPACE=dino-dush-non-prod

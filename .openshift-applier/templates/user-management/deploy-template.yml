@@ -3,7 +3,7 @@ apiVersion: template.openshift.io/v1
 kind: Template
 labels:
   template: deploy-template
-  system: dino-rush
+  system: dino-dush
   app: user-management
   kind: quarkus
 metadata:
@@ -13,7 +13,7 @@ objects:
   kind: ImageStream
   metadata:
     labels:
-      system: dino-rush
+      system: dino-dush
       app: ${APP_NAME}
       kind: quarkus
     name: ${APP_NAME}
@@ -22,7 +22,7 @@ objects:
   kind: Route
   metadata:
     labels:
-      system: dino-rush
+      system: dino-dush
       app: ${APP_NAME}
       kind: quarkus
     name: ${APP_NAME}
@@ -38,7 +38,7 @@ objects:
   kind: Service
   metadata:
     labels:
-      system: dino-rush
+      system: dino-dush
       app: ${APP_NAME}
       kind: quarkus
     name: ${APP_NAME}
@@ -47,14 +47,14 @@ objects:
     - name: service
       port: 8080
     selector:
-      system: dino-rush
+      system: dino-dush
       app: ${APP_NAME}
       kind: quarkus
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
     labels:
-      system: dino-rush
+      system: dino-dush
       app: ${APP_NAME}
       kind: quarkus
     annotations:
@@ -65,7 +65,7 @@ objects:
     revisionHistoryLimit: 10
     replicas: 1
     selector:
-      system: dino-rush
+      system: dino-dush
       app: ${APP_NAME}
       kind: quarkus
     strategy:
@@ -88,7 +88,7 @@ objects:
       metadata:
         creationTimestamp: null
         labels:
-          system: dino-rush
+          system: dino-dush
           app: ${APP_NAME}
           kind: quarkus
       spec:
