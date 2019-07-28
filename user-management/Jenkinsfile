@@ -190,9 +190,8 @@ pipeline {
         }
       }
       when {
-        and {
-          expression { GIT_BRANCH ==~ /(.*master)/ }
-          expression { WAS_APPROVED == 'true' }
+        expression {
+          GIT_BRANCH ==~ /(.*master)/ && WAS_APPROVED == 'true'
         }
       }
       steps {
@@ -209,9 +208,8 @@ pipeline {
         }
       }
       when {
-        and {
-          expression { GIT_BRANCH ==~ /(.*master)/ }
-          expression { WAS_APPROVED == 'false' }
+        expression {
+          GIT_BRANCH ==~ /(.*master)/ && WAS_APPROVED == 'false'
         }
       }
       steps {
