@@ -106,7 +106,7 @@ objects:
                 secretKeyRef:
                   key: database-password
                   name: ${APP_NAME}-db
-          image: "docker-registry.default.svc:5000/${NAMESPACE}/${APP_NAME}:${APP_TAG}"
+          image: ' '
           imagePullPolicy: Always
           livenessProbe:
             initialDelaySeconds: 20
