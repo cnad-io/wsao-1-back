@@ -58,9 +58,9 @@ pipeline {
         script {
           try {
             echo 'Rollout deployment'
-            ssh 'oc rollout resume dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
+            sh 'oc rollout resume dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
           } catch (error) {
-            ssh 'oc rollout latest dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
+            sh 'oc rollout latest dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
           }
         }
 
@@ -125,9 +125,9 @@ pipeline {
         script {
           try {
             echo 'Rollout deployment'
-            ssh 'oc rollout resume dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
+            sh 'oc rollout resume dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
           } catch (error) {
-            ssh 'oc rollout latest dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
+            sh 'oc rollout latest dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
           }
         }
 
