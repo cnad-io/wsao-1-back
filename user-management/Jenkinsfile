@@ -52,7 +52,7 @@ pipeline {
       steps {
         echo 'Set image for deployment'
         sh '''
-          oc set image dc/${APP_NAME} ${APP_NAME}=docker-registry.default.svc:5000/${NON_PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${NON_PROD_NAMESPACE}
+          oc set image dc/${APP_NAME} ${APP_NAME}=${NON_PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} --source=imagestreamtag -n ${NON_PROD_NAMESPACE}
         '''
 
         script {
@@ -120,7 +120,7 @@ pipeline {
         echo '### set env vars and image for deployment ###'
         sh '''
           oc set image dc/${APP_NAME}-${NOT_ACTIVE_MODE} \
-            ${APP_NAME}=docker-registry.default.svc:5000/${PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} -n ${PROD_NAMESPACE}
+            ${APP_NAME}=${PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} --source=imagestreamtag -n ${PROD_NAMESPACE}
         '''
         script {
           try {
