@@ -147,8 +147,7 @@ objects:
         securityContext: {}
         terminationGracePeriodSeconds: 30
     test: false
-    triggers:
-    - type: ConfigChange
+    triggers: []
   status: {}
 - apiVersion: v1
   kind: RoleBinding
