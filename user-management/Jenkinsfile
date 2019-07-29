@@ -58,11 +58,16 @@ pipeline {
 
         script {
           try {
-            echo 'Rollout deployment'
+            echo 'Resume deployment'
             sh 'oc rollout resume dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
-          } catch (error) {
+          } catch (error) {}
+        }
+
+        script {
+          try {
+            echo 'Rollout deployment'
             sh 'oc rollout latest dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
-          }
+          } catch (error) {}
         }
 
         echo 'Verify OCP deployment'
@@ -125,11 +130,16 @@ pipeline {
         '''
         script {
           try {
-            echo 'Rollout deployment'
+            echo 'Resume deployment'
             sh 'oc rollout resume dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
-          } catch (error) {
+          } catch (error) {}
+        }
+
+        script {
+          try {
+            echo 'Rollout deployment'
             sh 'oc rollout latest dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
-          }
+          } catch (error) {}
         }
 
         echo '### Verify OCP Deployment ###'

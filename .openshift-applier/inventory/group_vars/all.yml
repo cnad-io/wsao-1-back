@@ -37,14 +37,23 @@ openshift_cluster_content:
       - user-management
       - secret
       - build
-    - name: pipeline
+    - name: pipeline-ci
       template: "{{ inventory_dir }}/../templates/user-management/pipeline-template.yml"
-      params: "{{ inventory_dir }}/../params/user-management/pipeline"
+      params: "{{ inventory_dir }}/../params/user-management/pipeline-ci"
       # namespace: "{{ ci_cd_namespace }}"
       namespace: "{{ non_prod_namespace }}"
       tags:
       - user-management
-      - pipeline
+      - pipeline-ci
+      - build
+    - name: pipeline-cd
+      template: "{{ inventory_dir }}/../templates/user-management/pipeline-template.yml"
+      params: "{{ inventory_dir }}/../params/user-management/pipeline-cd"
+      # namespace: "{{ ci_cd_namespace }}"
+      namespace: "{{ non_prod_namespace }}"
+      tags:
+      - user-management
+      - pipeline-cd
       - build
     - name: unique-build
       template: "{{ inventory_dir }}/../templates/user-management/build-template.yml"

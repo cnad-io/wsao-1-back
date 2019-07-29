@@ -1,0 +1,5 @@
+APP_NAME=user-management-ci
+GIT_URL=https://github.com/cnad-io/wsao-1-back.git
+GIT_BRANCH=develop
+GIT_CONTEXT_DIR=user-management
+SOURCE_SECRET=git-auth
