@@ -23,8 +23,9 @@ pipeline {
       steps {
         echo 'Running build and tests'
         sh '''
+          sh 'update-alternatives --set java ${GRAALVM_HOME}/bin/java'
           cd user-management/
-          ./mvnw package
+          ./mvnw package -Pnative
         '''
 
         echo 'Create container image from package'
