@@ -18,6 +18,22 @@ objects:
       kind: quarkus
     name: '${APP_NAME}'
   spec: {}
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: 'ubi-quarkus-native-s2i'
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - from:
+        kind: DockerImage
+        name: 'quay.io/quarkus/ubi-quarkus-native-s2i:19.0.2'
+      generation: 2
+      importPolicy: {}
+      name: 19.0.2
+      referencePolicy:
+        type: Source
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
@@ -43,11 +59,19 @@ objects:
         memory: '${MEMORY_REQUEST}'
     runPolicy: Serial
     source:
-      binary: {}
-      type: Binary
+      contextDir: ${GIT_CONTEXT_DIR}
+      git:
+        ref: ${GIT_BRANCH}
+        uri: '${GIT_URL}'
+      type: Git
+      sourceSecret:
+        name: "${SOURCE_SECRET}"
     strategy:
-      dockerStrategy:
-        dockerfilePath: src/main/docker/Dockerfile.${MODE}
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: 'ubi-quarkus-native-s2i:19.0.2'
+      type: Source
     successfulBuildsHistoryLimit: 5
     triggers: []
   status: {}
@@ -70,12 +94,12 @@ parameters:
 - name: BUILD_TAG
   required: true
   value: latest
-- name: GITHUB_SECRET
-  from: '[a-zA-Z0-9]{40}'
-  generate: expression
-- name: GENERIC_SECRET
-  from: '[a-zA-Z0-9]{40}'
-  generate: expression
-- name: MODE
+- name: GIT_URL
   required: true
-  value: jvm
+  value: https://github.com/cnad-io/wsao-1-back.git
+- name: GIT_BRANCH
+  required: true
+  value: master
+- name: GIT_CONTEXT_DIR
+- name: SOURCE_SECRET
+  value: git-auth

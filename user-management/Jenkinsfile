@@ -14,24 +14,22 @@ pipeline {
     timeout(time: 20, unit: 'MINUTES')
   }
   stages {
-    stage("Build and test code") {
+    stage("Test and Build code") {
       agent {
         node {
           label "maven"
         }
       }
       steps {
-        echo 'Running build and tests'
+        echo 'Running tests'
         sh '''
-          update-alternatives --set java ${GRAALVM_HOME}/bin/java
           cd user-management/
-          ./mvnw package -Pnative
+          ./mvnw test
         '''
-
-        echo 'Create container image from package'
+        echo 'Running build'
         sh '''
           oc patch bc ${APP_NAME} -p "{\\"spec\\":{\\"output\\":{\\"to\\":{\\"kind\\":\\"ImageStreamTag\\",\\"name\\":\\"${APP_NAME}:${JENKINS_TAG}\\"}}}}" -n ${NON_PROD_NAMESPACE}
-          oc start-build ${APP_NAME} --from-dir=./user-management/ --follow -n ${NON_PROD_NAMESPACE}
+          oc start-build ${APP_NAME} --follow -n ${NON_PROD_NAMESPACE}
         '''
       }
       post {
@@ -55,21 +53,18 @@ pipeline {
         sh '''
           oc set image dc/${APP_NAME} ${APP_NAME}=${NON_PROD_NAMESPACE}/${APP_NAME}:${JENKINS_TAG} --source=imagestreamtag -n ${NON_PROD_NAMESPACE}
         '''
-
         script {
           try {
             echo 'Resume deployment'
             sh 'oc rollout resume dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
           } catch (error) {}
         }
-
         script {
           try {
             echo 'Rollout deployment'
             sh 'oc rollout latest dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
           } catch (error) {}
         }
-
         echo 'Verify OCP deployment'
         openshiftVerifyDeployment depCfg: env.APP_NAME,
           namespace: env.NON_PROD_NAMESPACE,
@@ -134,14 +129,12 @@ pipeline {
             sh 'oc rollout resume dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
           } catch (error) {}
         }
-
         script {
           try {
             echo 'Rollout deployment'
             sh 'oc rollout latest dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
           } catch (error) {}
         }
-
         echo '### Verify OCP Deployment ###'
         openshiftVerifyDeployment depCfg: "${APP_NAME}-${NOT_ACTIVE_MODE}",
           namespace: env.PROD_NAMESPACE,
@@ -176,7 +169,6 @@ pipeline {
                 [$class: 'BooleanParameterDefinition', defaultValue: true, description: '', name: 'Please confirm you agree with this']
                 ])
               echo 'userInput: ' + userInput
-
               if (userInput == true) {
                 // do action
                 echo "Action was accepted."
