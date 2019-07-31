@@ -7,7 +7,6 @@ pipeline {
     PROD_NAMESPACE = "dino-dush-prod"
     APP_NAME = "user-management"
     JENKINS_TAG = "v${BUILD_NUMBER}".replace("/", "-")
-    // GIT_CREDENTIALS = credentials('dino-dush-non-prod-git-auth')
     ACTIVE_MODE = 'blue'
   }
   options {
@@ -63,7 +62,6 @@ pipeline {
       }
       post {
         always {
-          // archive "user-management/**"
           junit 'user-management/target/surefire-reports/TEST-*.xml'
         }
         failure {
@@ -199,12 +197,12 @@ pipeline {
         }
       }
       steps {
-        echo 'Idle older deployment'
-        try {
-          sh '''
-            oc idle ${APP_NAME}-${ACTIVE_MODE} -n ${PROD_NAMESPACE}
-          '''
-        } catch (error) {}
+        script {
+          echo 'Idle older deployment'
+          try {
+            sh 'oc idle ${APP_NAME}-${ACTIVE_MODE} -n ${PROD_NAMESPACE}'
+          } catch (error) {}
+        }
       }
     }
     stage("Canceling deploy") {
