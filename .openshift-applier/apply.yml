@@ -9,3 +9,5 @@
   - include_vars: "{{ inventory_dir }}/../encrypted-vars.yml"
   - include_role:
       name: openshift-applier/roles/openshift-applier
+  - name: Set maven slave image
+    shell: oc set env dc jenkins MAVEN_SLAVE_IMAGE=quay.io/camedeir/jenkins-agent-quarkus:latest -n "{{ non_prod_namespace }}"

@@ -56,7 +56,7 @@ openshift_cluster_content:
       - pipeline-cd
       - build
     - name: unique-build
-      template: "{{ inventory_dir }}/../templates/user-management/build-template.yml"
+      template: "{{ inventory_dir }}/../templates/user-management/build-docker-template.yml"
       params: "{{ inventory_dir }}/../params/user-management/build"
       namespace: "{{ non_prod_namespace }}"
       tags:

@@ -24,12 +24,12 @@ pipeline {
         echo 'Running tests'
         sh '''
           cd user-management/
-          ./mvnw test
+          ./mvnw package -Pnative -Dnative-image.docker-build=true
         '''
         echo 'Running build'
         sh '''
           oc patch bc ${APP_NAME} -p "{\\"spec\\":{\\"output\\":{\\"to\\":{\\"kind\\":\\"ImageStreamTag\\",\\"name\\":\\"${APP_NAME}:${JENKINS_TAG}\\"}}}}" -n ${NON_PROD_NAMESPACE}
-          oc start-build ${APP_NAME} --follow -n ${NON_PROD_NAMESPACE}
+          oc start-build ${APP_NAME} --from-dir=./user-management/ --follow -n ${NON_PROD_NAMESPACE}
         '''
       }
       post {
