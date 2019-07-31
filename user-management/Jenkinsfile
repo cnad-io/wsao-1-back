@@ -92,13 +92,13 @@ pipeline {
               ACTIVE_MODE = sh 'oc get pod --selector=app=${APP_NAME} -o jsonpath="{ .items[0].metadata.labels.mode }" -n ${PROD_NAMESPACE}'
             }
           } catch (error) {}
-          if (env.ACTIVE_MODE == '') {
+          if ("${ACTIVE_MODE}" == '') {
             environment {
               ACTIVE_MODE = 'blue'
             }
           }
           echo "Active mode: ${ACTIVE_MODE}"
-          if (env.ACTIVE_MODE == 'blue') {
+          if ("${ACTIVE_MODE}" == 'blue') {
             environment {
               NOT_ACTIVE_MODE = 'green'
             }
