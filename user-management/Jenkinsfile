@@ -89,8 +89,6 @@ pipeline {
             echo 'Resume deployment'
             sh 'oc rollout resume dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
           } catch (error) {}
-        }
-        script {
           try {
             echo 'Rollout deployment'
             sh 'oc rollout latest dc/${APP_NAME} -n ${NON_PROD_NAMESPACE}'
@@ -131,13 +129,13 @@ pipeline {
             echo 'Resume deployment'
             sh 'oc rollout resume dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
           } catch (error) {}
-        }
-        script {
           try {
             echo 'Rollout deployment'
             sh 'oc rollout latest dc/${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
           } catch (error) {}
         }
+
+        sh 'oc scale --replicas=1 dc ${APP_NAME}-${NOT_ACTIVE_MODE} -n ${PROD_NAMESPACE}'
         echo '### Verify OCP Deployment ###'
         openshiftVerifyDeployment depCfg: "${APP_NAME}-${NOT_ACTIVE_MODE}",
           namespace: env.PROD_NAMESPACE,
