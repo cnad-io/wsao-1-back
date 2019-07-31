@@ -27,8 +27,11 @@ pipeline {
         script {
           echo 'Get active mode'
           try {
-            env.ACTIVE_MODE = sh(script : 'oc get pod --selector=app=${APP_NAME} -o jsonpath="{ .items[0].metadata.labels.mode }" -n ${PROD_NAMESPACE}', returnStdout: true).trim()
-            echo env.ACTIVE_MODE
+            ACTIVE_MODE = sh (
+              script : 'oc get pod --selector=app=${APP_NAME} -o jsonpath="{ .items[0].metadata.labels.mode }" -n ${PROD_NAMESPACE}',
+              returnStdout: true
+            ).trim()
+            echo ACTIVE_MODE
           } catch (error) {}
           if ("${ACTIVE_MODE}" == '') {
             env.ACTIVE_MODE = 'blue'
