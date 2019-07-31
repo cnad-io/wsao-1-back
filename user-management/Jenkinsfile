@@ -8,6 +8,7 @@ pipeline {
     APP_NAME = "user-management"
     JENKINS_TAG = "v${BUILD_NUMBER}".replace("/", "-")
     GIT_CREDENTIALS = credentials('dino-dush-non-prod-git-auth')
+    ACTIVE_MODE = 'blue'
   }
   options {
     buildDiscarder(logRotator(numToKeepStr:'10'))
@@ -27,24 +28,16 @@ pipeline {
         script {
           echo 'Get active mode'
           try {
-            environment {
-              ACTIVE_MODE = sh 'oc get pod --selector=app=${APP_NAME} -o jsonpath="{ .items[0].metadata.labels.mode }" -n ${PROD_NAMESPACE}'
-            }
+            env.ACTIVE_MODE = sh 'oc get pod --selector=app=${APP_NAME} -o jsonpath="{ .items[0].metadata.labels.mode }" -n ${PROD_NAMESPACE}'
           } catch (error) {}
           if ("${ACTIVE_MODE}" == '') {
-            environment {
-              ACTIVE_MODE = 'blue'
-            }
+            env.ACTIVE_MODE = 'blue'
           }
           echo "Active mode: ${ACTIVE_MODE}"
           if ("${ACTIVE_MODE}" == 'blue') {
-            environment {
-              NOT_ACTIVE_MODE = 'green'
-            }
+            env.NOT_ACTIVE_MODE = 'green'
           } else {
-            environment {
-              NOT_ACTIVE_MODE = 'blue'
-            }
+            env.NOT_ACTIVE_MODE = 'blue'
           }
           echo "Not Active mode: ${NOT_ACTIVE_MODE}"
         }
