@@ -24,7 +24,7 @@ pipeline {
         echo 'Running tests'
         sh '''
           cd user-management/
-          ./mvnw package -Pnative -Dnative-image.docker-build=true
+          ./mvnw clean package -Pnative
         '''
         echo 'Running build'
         sh '''
