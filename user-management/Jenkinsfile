@@ -14,6 +14,42 @@ pipeline {
     timeout(time: 20, unit: 'MINUTES')
   }
   stages {
+    stage("Prepare B/G Deploy") {
+      agent {
+        node {
+          label "master"
+        }
+      }
+      when {
+        expression { GIT_BRANCH ==~ /(.*master)/ }
+      }
+      steps {
+        script {
+          echo 'Get active mode'
+          try {
+            environment {
+              ACTIVE_MODE = sh 'oc get pod --selector=app=${APP_NAME} -o jsonpath="{ .items[0].metadata.labels.mode }" -n ${PROD_NAMESPACE}'
+            }
+          } catch (error) {}
+          if ("${ACTIVE_MODE}" == '') {
+            environment {
+              ACTIVE_MODE = 'blue'
+            }
+          }
+          echo "Active mode: ${ACTIVE_MODE}"
+          if ("${ACTIVE_MODE}" == 'blue') {
+            environment {
+              NOT_ACTIVE_MODE = 'green'
+            }
+          } else {
+            environment {
+              NOT_ACTIVE_MODE = 'blue'
+            }
+          }
+          echo "Not Active mode: ${NOT_ACTIVE_MODE}"
+        }
+      }
+    }
     stage("Test and Build code") {
       agent {
         node {
@@ -73,42 +109,6 @@ pipeline {
           verifyReplicaCount: 'true',
           waitTime: '',
           waitUnit: 'sec'
-      }
-    }
-    stage("Prepare B/G Deploy") {
-      agent {
-        node {
-          label "master"
-        }
-      }
-      when {
-        expression { GIT_BRANCH ==~ /(.*master)/ }
-      }
-      steps {
-        script {
-          echo 'Get active mode'
-          try {
-            environment {
-              ACTIVE_MODE = sh 'oc get pod --selector=app=${APP_NAME} -o jsonpath="{ .items[0].metadata.labels.mode }" -n ${PROD_NAMESPACE}'
-            }
-          } catch (error) {}
-          if ("${ACTIVE_MODE}" == '') {
-            environment {
-              ACTIVE_MODE = 'blue'
-            }
-          }
-          echo "Active mode: ${ACTIVE_MODE}"
-          if ("${ACTIVE_MODE}" == 'blue') {
-            environment {
-              NOT_ACTIVE_MODE = 'green'
-            }
-          } else {
-            environment {
-              NOT_ACTIVE_MODE = 'blue'
-            }
-          }
-          echo "Not Active mode: ${NOT_ACTIVE_MODE}"
-        }
       }
     }
     stage("B/G Deploy Prod") {
