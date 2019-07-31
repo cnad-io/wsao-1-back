@@ -21,12 +21,12 @@ pipeline {
         }
       }
       steps {
-        echo 'Running tests'
+        echo 'Running biuld and tests'
         sh '''
           cd user-management/
           ./mvnw clean package -Pnative
         '''
-        echo 'Running build'
+        echo 'Generating container image'
         sh '''
           oc patch bc ${APP_NAME} -p "{\\"spec\\":{\\"output\\":{\\"to\\":{\\"kind\\":\\"ImageStreamTag\\",\\"name\\":\\"${APP_NAME}:${JENKINS_TAG}\\"}}}}" -n ${NON_PROD_NAMESPACE}
           oc start-build ${APP_NAME} --from-dir=./user-management/ --follow -n ${NON_PROD_NAMESPACE}
@@ -88,18 +88,24 @@ pipeline {
         script {
           echo 'Get active mode'
           try {
-            env.ACTIVE_MODE = sh '''
-              oc get pod --selector=app=${APP_NAME} -o jsonpath='{ .items[0].metadata.labels.mode }' -n ${PROD_NAMESPACE}
-            '''
+            environment {
+              ACTIVE_MODE = sh 'oc get pod --selector=app=${APP_NAME} -o jsonpath="{ .items[0].metadata.labels.mode }" -n ${PROD_NAMESPACE}'
+            }
           } catch (error) {}
           if (env.ACTIVE_MODE == '') {
-            env.ACTIVE_MODE = 'blue'
+            environment {
+              ACTIVE_MODE = 'blue'
+            }
           }
           echo "Active mode: ${ACTIVE_MODE}"
           if (env.ACTIVE_MODE == 'blue') {
-            env.NOT_ACTIVE_MODE = 'green'
+            environment {
+              NOT_ACTIVE_MODE = 'green'
+            }
           } else {
-            env.NOT_ACTIVE_MODE = 'blue'
+            environment {
+              NOT_ACTIVE_MODE = 'blue'
+            }
           }
           echo "Not Active mode: ${NOT_ACTIVE_MODE}"
         }
