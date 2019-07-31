@@ -7,7 +7,6 @@ pipeline {
     PROD_NAMESPACE = "dino-dush-prod"
     APP_NAME = "user-management"
     JENKINS_TAG = "v${BUILD_NUMBER}".replace("/", "-")
-    ACTIVE_MODE = 'blue'
   }
   options {
     buildDiscarder(logRotator(numToKeepStr:'10'))
@@ -36,6 +35,7 @@ pipeline {
           if ("${ACTIVE_MODE}" == '') {
             env.ACTIVE_MODE = 'blue'
           }
+          env.ACTIVE_MODE = ACTIVE_MODE
           echo "Active mode: ${ACTIVE_MODE}"
           if ("${ACTIVE_MODE}" == 'blue') {
             env.NOT_ACTIVE_MODE = 'green'
