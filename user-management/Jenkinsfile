@@ -7,8 +7,7 @@ pipeline {
     PROD_NAMESPACE = "dino-dush-prod"
     APP_NAME = "user-management"
     JENKINS_TAG = "v${BUILD_NUMBER}".replace("/", "-")
-    GIT_CREDENTIALS = credentials('dino-dush-non-prod-git-auth')
-    ACTIVE_MODE = 'blue'
+    // GIT_CREDENTIALS = credentials('dino-dush-non-prod-git-auth')
   }
   options {
     buildDiscarder(logRotator(numToKeepStr:'10'))
@@ -28,7 +27,7 @@ pipeline {
         script {
           echo 'Get active mode'
           try {
-            env.ACTIVE_MODE = sh 'oc get pod --selector=app=${APP_NAME} -o jsonpath="{ .items[0].metadata.labels.mode }" -n ${PROD_NAMESPACE}'
+            env.ACTIVE_MODE = sh 'oc get pod --selector=app=${APP_NAME} -o jsonpath="{ .items[0].metadata.labels.mode }" -n ${PROD_NAMESPACE} || true'
           } catch (error) {}
           if ("${ACTIVE_MODE}" == '') {
             env.ACTIVE_MODE = 'blue'
@@ -147,7 +146,7 @@ pipeline {
 
         echo '### Change balance configuration ###'
         sh '''
-          oc set route-backends ${APP_NAME} ${APP_NAME}-${ACTIVE_MODE}=0 ${APP_NAME}-${NOT_ACTIVE_MODE}=0 -n ${PROD_NAMESPACE}
+          oc set route-backends ${APP_NAME} ${APP_NAME}-${ACTIVE_MODE}=0 ${APP_NAME}-${NOT_ACTIVE_MODE}=100 -n ${PROD_NAMESPACE}
         '''
       }
     }
