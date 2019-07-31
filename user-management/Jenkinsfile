@@ -8,6 +8,7 @@ pipeline {
     APP_NAME = "user-management"
     JENKINS_TAG = "v${BUILD_NUMBER}".replace("/", "-")
     // GIT_CREDENTIALS = credentials('dino-dush-non-prod-git-auth')
+    ACTIVE_MODE = 'blue'
   }
   options {
     buildDiscarder(logRotator(numToKeepStr:'10'))
