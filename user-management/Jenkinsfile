@@ -163,7 +163,7 @@ pipeline {
         script {
           def userInput = false
           try {
-            timeout(time: 1, unit: "MINUTES") {
+            timeout(time: 5, unit: "MINUTES") {
               userInput = input(
                 id: 'Proceed1', message: 'Was this successful?', parameters: [
                 [$class: 'BooleanParameterDefinition', defaultValue: true, description: '', name: 'Please confirm you agree with this']
