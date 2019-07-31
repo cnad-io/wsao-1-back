@@ -200,9 +200,11 @@ pipeline {
       }
       steps {
         echo 'Idle older deployment'
-        sh '''
-          oc idle ${APP_NAME}-${ACTIVE_MODE} -n ${PROD_NAMESPACE}
-        '''
+        try {
+          sh '''
+            oc idle ${APP_NAME}-${ACTIVE_MODE} -n ${PROD_NAMESPACE}
+          '''
+        } catch (error) {}
       }
     }
     stage("Canceling deploy") {
